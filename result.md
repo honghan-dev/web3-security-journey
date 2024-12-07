@@ -63,5 +63,28 @@ Result:
 
 Total earnings: 0
 
+### [One-world](https://codehawks.cyfrin.io/c/2024-10-one-world)
+Platform: Codehawks
+
+
+
+Result:
+
+|  | My Findings | Total Findings | Percentage | Payout |
+| --- | --- | --- | --- | --- |
+| High | 0 | 1 | 0% | 0 |
+| Medium | 0 | 0 | 0% | 0 |
+| Low | 0 | 4 | 0% | 0 |
+|  |  |  |  | 0 USD |
+
+Total earnings: 0
+
 ### [Debita V3](https://audits.sherlock.xyz/contests/627)
 Platform: Sherlock
+
+|  | My Findings | Total Findings | Percentage | Payout |
+| --- | --- | --- | --- | --- |
+| High | 1 |  |  |  |
+| Medium | 1 |  |  |  |
+| Low | 0 |  |  |  |
+|  |  |  |  | 0 USD |
