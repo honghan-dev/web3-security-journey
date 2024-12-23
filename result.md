@@ -82,7 +82,7 @@ Platform: Sherlock
 
 |  | My Findings | Total Findings | Percentage | Payout |
 | --- | --- | --- | --- | --- |
-| High | 1 | 4 | 25% |  |
+| High | 1 | 5 | 12.5% | 7 USD |
 | Medium | 0 | 22 | 0 |  |
 |  |  |  |  |  |
 |  |  |  |  | 7 USD |
@@ -92,7 +92,7 @@ Platform: Cantina
 
 |  | My Findings | Total Findings | Percentage | Payout |
 | --- | --- | --- | --- | --- |
-| High | 1 |  |  |  |
-| Medium | 1 |  |  |  |
-| Low | 0 |  |  |  |
+| High | 0 |  |  |  |
+| Medium |  |  |  |  |
+| Low | 1(withdrawn) |  |  |  |
 |  |  |  |  | 0 USD |
