@@ -96,3 +96,13 @@ Platform: Cantina
 | Medium |  |  |  |  |
 | Low | 1(withdrawn) |  |  |  |
 |  |  |  |  | 0 USD |
+
+### [QuantAMM](https://codehawks.cyfrin.io/c/2024-12-quantamm)
+Platform: CodeHawks
+
+|  | My Findings | Total Findings | Percentage | Payout |
+| --- | --- | --- | --- | --- |
+| High | 0 |  |  |  |
+| Medium |  |  |  |  |
+| Low | 1(withdrawn) |  |  |  |
+|  |  |  |  | 0 USD |
