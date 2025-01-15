@@ -1,8 +1,8 @@
-# 2024
+## 2024
 
 ### September
 
-### [Tadle Project](https://codehawks.cyfrin.io/c/2024-08-tadle)
+#### [Tadle Project](https://codehawks.cyfrin.io/c/2024-08-tadle)
 Platform: Codehawks
 
 Tadle is a cutting-edge pre-market infrastructure designed to unlock illiquid assets in the crypto pre-market.
@@ -18,7 +18,7 @@ Result:
 
 Total earnings: **18.5USD**
 
-### [Uniswap V4](https://cantina.xyz/competitions/e2cf6906-ec8b-4c78-a585-74ac90615659)
+#### [Uniswap V4](https://cantina.xyz/competitions/e2cf6906-ec8b-4c78-a585-74ac90615659)
 Platform: Cantina
 
 Result :
@@ -33,7 +33,7 @@ Result :
 
 ### October
 
-### [Stakelink](https://codehawks.cyfrin.io/c/2024-09-stakelink)
+#### [Stakelink](https://codehawks.cyfrin.io/c/2024-09-stakelink)
 Platform: Codehawks
 
 |  | My Findings | Total Findings | Percentage | Payout |
@@ -47,7 +47,7 @@ Total hours spent: 29H23mins
 
 ### November
 
-### [Sablier Flow](https://codehawks.cyfrin.io/c/2024-10-sablier)
+#### [Sablier Flow](https://codehawks.cyfrin.io/c/2024-10-sablier)
 Platform: Codehawks
 
 Flow is a debt-tracking protocol that tracks tokens owed between two parties, enabling open-ended payment streaming.
@@ -63,7 +63,7 @@ Result:
 
 Total earnings: 0
 
-### [One-world](https://codehawks.cyfrin.io/c/2024-10-one-world)
+#### [One-world](https://codehawks.cyfrin.io/c/2024-10-one-world)
 Platform: Codehawks
 
 Result:
@@ -77,7 +77,7 @@ Result:
 
 Total earnings: 0
 
-### [Debita V3](https://audits.sherlock.xyz/contests/627)
+#### [Debita V3](https://audits.sherlock.xyz/contests/627)
 Platform: Sherlock
 
 |  | My Findings | Total Findings | Percentage | Payout |
@@ -87,7 +87,7 @@ Platform: Sherlock
 |  |  |  |  |  |
 |  |  |  |  | 7 USD |
 
-### [Collar](https://cantina.xyz/competitions/050711ca-a6d1-4fdd-9f94-3816233c1bd5)
+#### [Collar](https://cantina.xyz/competitions/050711ca-a6d1-4fdd-9f94-3816233c1bd5)
 Platform: Cantina
 
 |  | My Findings | Total Findings | Percentage | Payout |
@@ -97,7 +97,11 @@ Platform: Cantina
 | Low | 1(withdrawn) |  |  |  |
 |  |  |  |  | 0 USD |
 
-### [QuantAMM](https://codehawks.cyfrin.io/c/2024-12-quantamm)
+## 2025
+
+### January
+
+#### [QuantAMM](https://codehawks.cyfrin.io/c/2024-12-quantamm)
 Platform: CodeHawks
 
 |  | My Findings | Total Findings | Percentage | Payout |
