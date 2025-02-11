@@ -1,6 +1,6 @@
 ## 2024
 
-### September
+### August
 
 #### [Tadle Project](https://codehawks.cyfrin.io/c/2024-08-tadle)
 Platform: Codehawks
