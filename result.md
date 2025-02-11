@@ -106,7 +106,7 @@ Platform: CodeHawks
 
 |  | My Findings | Total Findings | Percentage | Payout |
 | --- | --- | --- | --- | --- |
-| High | 0 |  |  |  |
+| High | 2 |  |  |  |
 | Medium |  |  |  |  |
-| Low | 1(withdrawn) |  |  |  |
+| Low |  |  |  |  |
 |  |  |  |  | 0 USD |
