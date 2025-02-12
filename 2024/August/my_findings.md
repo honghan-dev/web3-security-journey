@@ -663,6 +663,3 @@ function createTaker(address _offer, uint256 _points) external payable {
     ...
 }
 ```
-
-
-

@@ -1,4 +1,4 @@
-### Questions to ask after each audit
+### Questions to ask during/after each audit
 
 1. Don't know what to look for
 2. Not focus enough
