@@ -106,7 +106,7 @@ Platform: CodeHawks
 
 |  | My Findings | Total Findings | Percentage | Payout |
 | --- | --- | --- | --- | --- |
-| High | 2 | 13 | 15% |  |
+| High | 2 | 13 | 15% | 143.16 OP |
 | Medium |  |  |  |  |
 | Low |  |  |  |  |
-|  |  |  |  | 0 USD |
+|  |  |  |  | 143.16 OP |
