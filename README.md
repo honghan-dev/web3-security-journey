@@ -14,6 +14,6 @@ Resources and tools that helped along the way
 
 ## 📊 My Results
 
-[View my contest results]
+[View my contest results](https://github.com/honghan-dev/web3-security-journey/blob/master/my_result.md)
 
 This repository will be regularly updated as I participate in new contests and expand my knowledge. Feel free to follow along and share some insights!
