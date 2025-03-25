@@ -3,3 +3,5 @@
 Hi, I'm Han.
 
 This repository records my journey into Web3 security research, documenting contest experiences, key findings, and lessons learned. I aim to improve and grow as a Web3 security researcher continually.
+
+[My result](https://github.com/honghan-dev/web3-security-journey/blob/master/my_result.md)
