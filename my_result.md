@@ -1,4 +1,4 @@
-Hi, I'm Han.
+Hi, I'm Han. 👋
 
 Welcome to my Web3 security research journey! This repository serves as a personal log of my experiences in Web3 auditing contests, highlighting key findings, security insights, and lessons learned along the way. My goal is to refine my skills continuously, contribute to the security of decentralized systems, and grow as a Web3 security researcher.
 
