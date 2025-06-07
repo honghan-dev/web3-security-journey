@@ -24,7 +24,7 @@ This repository will be regularly updated as I participate in new contests and e
 
 | **Date** | **Contest** | **Platform** | **Findings** | **Success Rate** | **Result** | **Rank** |
 |----------|-------------|--------------|--------------|------------------|------------|----------|
-|2025 Apr| **Velvet V4** | Cantina | | | | |
+|2025 Apr| [**Velvet V4**](https://cantina.xyz/competitions/8cf9c7a0-a7a6-446a-8577-1e2c254eb5a8) | Cantina | | | | |
 | 2025 Jan | [**QuantAMM**](https://codehawks.cyfrin.io/c/2024-12-quantamm) | CodeHawks | 2H/13 | H: 15% | 143.16 OP | TBD |
 | 2025 Jan | [**Napier V2**](https://cantina.xyz/competitions/58cd719b-9004-4eca-a113-41d1691c0711) | Cantina | 0 | - | 0 | - |
 | 2024 Nov | [**Collar**](https://cantina.xyz/competitions/050711ca-a6d1-4fdd-9f94-3816233c1bd5) | Cantina | 1L (withdrawn) | L: withdrawn | $0 | TBD |
