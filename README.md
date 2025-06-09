@@ -13,15 +13,6 @@ Welcome to my Web3 security research journey! This repository serves as a person
 
 This repository will be regularly updated as I participate in new contests and expand my knowledge. Feel free to follow along and share some insights!
 
-## Highlights
-* **Active Platforms**: Codehawks, Cantina, Sherlock
-* **Total Contests**: 9 contests completed
-* **Total Earnings**: $25.37 USD + 143.16 OP tokens
-* **Specialization**: High-severity vulnerability detection
-* **Time Investment**: 29+ hours documented
-
-### 📊 All Contest History
-
 | **Date** | **Contest** | **Platform** | **Findings** | **Success Rate** | **Result** | **Rank** |
 |----------|-------------|--------------|--------------|------------------|------------|----------|
 |2025 Apr| [**Velvet V4**](https://cantina.xyz/competitions/8cf9c7a0-a7a6-446a-8577-1e2c254eb5a8) | Cantina | | | | |
