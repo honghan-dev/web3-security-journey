@@ -1,16 +1,14 @@
-### Questions to ask during/after each audit
+# Notes on how I improve as a Web3 Security Researcher
 
-1. Don't know what to look for
-2. Not focus enough
-3. Missing bugs/vulnerability  
-4. Not able to find bugs/vulnerability (lack of experience)
-5. Not taking good notes
+1. Commit More Hours
+Malcolm Gladwell’s [**10,000 hour rule**](https://pmc.ncbi.nlm.nih.gov/articles/PMC4662388/) — mastery comes from consistent, focused effort.
+Spend more time auditing, reading technical documents, listening to podcast
 
-1. **Commit more hours.**
-I'm huge believer of Malcom Gladwell's 10,000 hours rules. The best way to improve is to invest more time into auditing. Looking at different codebase, different DeFi protocols. After spending more time then we discover what our strength and weakness is, what area should we improve and how do we audit a codebase more efficiencyly. 
+2. Focus on Understanding the Codebase
+Instead of skimming everything, I aim to deeply understand core components. Quality over quantity — real insights come from depth, not just coverage.
 
-2. Develope good feedback system
-Getting good feedback is the best way to improve, that includes going through more codebase, projects/protocol, reading more bug/vulnerability reports
+3. Learn by Doing
+Theory only goes so far. Every audit, real or practice, teaches more than reading alone. I improve fastest when I apply, break, and fix things hands-on.
 
-3. Focus on understanding the codebase
-It is more important to understand a section of the codebase completely, than going through all the codebase but didn't understand it properly.
+4. Develop a Feedback Loop
+Constantly review past audits, compare my findings with top reports, and analyze what I missed. Learning from gaps is the fastest way to level up.
