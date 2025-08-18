@@ -31,10 +31,12 @@
 
 ### Note
 
-- Issue 1: Protocol continues emitting and accounting for rewards (accumulated) even when no users are eligible to receive them (working_supply == 0)
+- Admin transfer token to protocol to incentivize users.
+
+- Issue 1: Protocol continues emitting and accounting for `rewards (accumulated)` even when no users are eligible to receive them `(working_supply == 0)`. (Protocol distributes the token despite no user to incentivize)
 - Issue 2: Ghost tokens (emitted during zero-liquidity periods) are counted as "distributed" in accounting, preventing admin recovery of genuinely unused rewards
 
-- `Root Cause:` Emission logic (update_rewards_data()) runs independently of distribution logic (update_reward_inv()), creating tokens that exist in accounting but are economically unclaimable.
+- `Root Cause:`: Protocol distributes the token despite no user to incentivize. Admin then cannot reclaim the undistributed token, because of this continuous distribution without user working supply check.
 
 - **How to spot bug**
 
