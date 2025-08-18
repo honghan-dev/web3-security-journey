@@ -26,3 +26,18 @@
 
 - `Test bypass scenarios` - Ask "If function X is blocked, how else can I achieve the same result?"
 - `Look for inconsistent protection patterns` - Check if security controls are applied uniformly across all relevant functions
+
+## [M02. Reward Emissions Accumulate Even When Pool Has No Liquidity, Causing Irrecoverable Token Lock](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/findings/516)
+
+### Note
+
+- Issue 1: Protocol continues emitting and accounting for rewards (accumulated) even when no users are eligible to receive them (working_supply == 0)
+- Issue 2: Ghost tokens (emitted during zero-liquidity periods) are counted as "distributed" in accounting, preventing admin recovery of genuinely unused rewards
+
+- `Root Cause:` Emission logic (update_rewards_data()) runs independently of distribution logic (update_reward_inv()), creating tokens that exist in accounting but are economically unclaimable.
+
+- **How to spot bug**
+
+- `Trace emission vs distribution flows` - Check if reward emission logic runs independently of actual distribution capability.
+
+- `Test zero-state scenarios` - Ask "What happens during periods with no eligible users/liquidity?"
