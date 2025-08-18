@@ -54,4 +54,4 @@
 
 - **How to spot**
 
-- `Validate inputs BEFORE function calls` - Always check for edge cases (zero, negative, extreme values) before calling mathematical functions, not after
+- `Validate inputs BEFORE function calls` - Always check for edge cases (zero, negative, extreme values) before calling mathematical functions, not after.
