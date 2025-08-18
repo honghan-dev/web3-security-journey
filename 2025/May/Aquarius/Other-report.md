@@ -43,3 +43,15 @@
 - `Trace emission vs distribution flows` - Check if reward emission logic runs independently of actual distribution capability.
 
 - `Test zero-state scenarios` - Ask "What happens during periods with no eligible users/liquidity?"
+
+## [M03. Stableswap calculator fails due to 0 value swaps](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/findings/381)
+
+### Note
+
+- Issue: Calculator's iterative liquidity estimation reduces input amounts to zero, then calls Newton-Raphson method with `dx = 0`, causing precision errors and underflow panic.
+
+- Impact: One malicious pool can break reward allocation for ALL pools sharing the same token pair, causing system-wide DoS of reward distribution
+
+- **How to spot**
+
+- `Validate inputs BEFORE function calls` - Always check for edge cases (zero, negative, extreme values) before calling mathematical functions, not after
