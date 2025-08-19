@@ -55,3 +55,20 @@
 - **How to spot**
 
 - `Validate inputs BEFORE function calls` - Always check for edge cases (zero, negative, extreme values) before calling mathematical functions, not after.
+
+## [Stable pool rewards can get overinflated if the tokens have different decimals](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/findings/271)
+
+### Note
+
+- Issue: Doesn't handle token decimal differences while pool contract does, causing inconsistent mathematical operations on incompatible number scales.
+- Impact: Stable pools with mixed-decimal tokens get artificially inflated liquidity scores, receiving disproportionately higher rewards at expense of standard pools
+
+Root Cause:
+rust// Pool contract (CORRECT):
+let x = xp.get(i).unwrap() + dx * precision_mul.get(i).unwrap();  // ✅ Scales input
+let dy = (xp.get(j).unwrap() - y - 1) / precision_mul.get(j).unwrap();  // ✅ Unscales output
+
+- **How to Spot This Bug Pattern:**
+
+- `Check decimal handling consistency` - When multiple contracts perform similar math, ensure they handle token decimals identically
+- `Look for precision multiplier usage` - If one contract uses precision_mul for decimal normalization, all related contracts should too
