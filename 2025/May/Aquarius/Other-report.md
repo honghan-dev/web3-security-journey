@@ -109,3 +109,19 @@ dy = result * (1 - f)         // Fee applied to output as simple multiplier
 - `Audit AMM fee application order` - Fee should be applied to input before constant product calculation, not to output after
 
 - `Verify constant product maintenance` - x × y should remain constant after trades (accounting for fees)
+
+## [M. Reward distribution may be vulnerable to sandwich attacks](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/findings/38)
+
+### Note
+
+- Issue: Reward distribution between pools uses instant liquidity snapshots that can be manipulated via flash loans to unfairly skew reward allocation
+
+- Impact: Attackers can steal up to 90%+ of reward allocation from legitimate pools by temporarily inflating liquidity during snapshot timing
+
+- **How to Spot This Bug**
+
+- `Identify instant snapshot mechanisms` - Look for functions that capture state at exact moments for important decisions
+
+- `Audit reward/incentive distribution logic` - Systems that allocate value based on momentary state are vulnerable
+
+- `Look for flash loan attack vectors` - Temporary liquidity inflation can skew any instant-based calculations
