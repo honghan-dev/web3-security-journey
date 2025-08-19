@@ -72,3 +72,40 @@ let dy = (xp.get(j).unwrap() - y - 1) / precision_mul.get(j).unwrap();  // ✅ U
 
 - `Check decimal handling consistency` - When multiple contracts perform similar math, ensure they handle token decimals identically
 - `Look for precision multiplier usage` - If one contract uses precision_mul for decimal normalization, all related contracts should too
+
+## [M. Permanent Pool Lockout via Arithmetic Overflow in Reward Distribution Logic](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/findings/251)
+
+### Note
+
+- Issue: `340282366920938463463374607431768211455` = `3*10^38`, Reward system performs unchecked arithmetic operations that can overflow `u128` limits when calculating per-share rewards and user rewards.
+
+- Impact: Once triggered, causes permanent pool lockout where all functions (claim, deposit, withdraw, even admin fixes) panic, making all user funds permanently inaccessible.
+
+- **How to spot them**
+
+- `Audit unchecked arithmetic operations` - Look for direct multiplication/division of large numbers without overflow protection
+
+- `Identify scaling factors and precision multipliers` - Constants like `10^18` are red flags when multiplied with user-controlled or time-accumulated values
+
+## [M. Incorrect fee application in Uniswap V2-Inspired AMM Protocol](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/findings/181)
+
+### Note
+
+- Issue: Fee applied to output amount instead of input amount, breaking constant product formula `(x × y = k)` used in standard AMM implementations
+
+- Impact: Creates systematic arbitrage opportunities and pricing discrepancies that disadvantage users and can be exploited to drain liquidity
+
+```rust
+// Correct Uniswap V2 formula:
+dy = (y * dx * (1 - f)) / (x + dx * (1 - f))  // Fee applied to input in both numerator and denominator
+
+// Broken implementation:
+result = (y * dx) / (x + dx)  // Full input used in constant product
+dy = result * (1 - f)         // Fee applied to output as simple multiplier
+```
+
+- **How to spot**
+
+- `Audit AMM fee application order` - Fee should be applied to input before constant product calculation, not to output after
+
+- `Verify constant product maintenance` - x × y should remain constant after trades (accounting for fees)
