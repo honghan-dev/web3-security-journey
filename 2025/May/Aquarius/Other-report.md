@@ -147,3 +147,18 @@ pub fn read_allowance(e: &Env, from: Address, spender: Address) -> AllowanceValu
     }
 }
 ```
+
+## [L. Incorrect Admin Transfer Pattern](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/findings/569)
+
+### Note
+
+- `Issue`: Admin transfer mechanism allows current admin to unilaterally transfer ownership without requiring new admin's acceptance or confirmation
+
+- Use the claim-based pattern:
+
+`commit_transfer_ownership(new_admin)` – Called by the current admin.
+`claim_ownership()` – Called by new_admin, confirming the transfer.
+
+- **How to spot**
+
+- Understanding modern best practice of ownership
