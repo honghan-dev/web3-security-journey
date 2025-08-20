@@ -125,3 +125,25 @@ dy = result * (1 - f)         // Fee applied to output as simple multiplier
 - `Audit reward/incentive distribution logic` - Systems that allocate value based on momentary state are vulnerable
 
 - `Look for flash loan attack vectors` - Temporary liquidity inflation can skew any instant-based calculations
+
+## [L. Expired Allowance Keys Linger, Causing Rent Leak and Indexer Noise](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/findings/686)
+
+### Note
+
+- Issue: Expired allowance entries remain in storage after expiration instead of being cleaned up, causing unnecessary storage bloat. (SPECIFIC TO SOROBAN ONLY)
+
+### Recommendation
+
+```rust
+pub fn read_allowance(e: &Env, from: Address, spender: Address) -> AllowanceValue {
+    let key = DataKey::Allowance(AllowanceDataKey { from, spender });
+    match e.storage().temporary().get::<_, AllowanceValue>(&key) {
+        Some(allowance) if allowance.expiration_ledger < e.ledger().sequence() => {
+            e.storage().temporary().remove(&key);          // cleanup ✅
+            AllowanceValue { amount: 0, expiration_ledger: allowance.expiration_ledger }
+        },
+        Some(allowance) => allowance,
+        None => AllowanceValue::default(),
+    }
+}
+```
