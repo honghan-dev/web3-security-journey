@@ -132,3 +132,18 @@ equal_weights + unequal_results              // Selection bias indicator
 - "What happens when validators are removed?" - Trace impact on BFT tolerance
 - "Are design assumptions enforced continuously?" - Verify parameter stability
 - "Can the system handle originally-planned fault scenarios after changes?" - Test degraded states
+
+## [M - Gossip message authorization bypass](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/835)
+
+### Summary
+
+- Issue: Topic-based access control can be bypassed by sending restricted content through permissionless topics
+- Root Cause: Authorization validates topic permissions but message processing ignores which topic content arrived on
+- Attack Vector: Send batch messages (committee-only) via "tn-txn" topic (permissionless) to bypass committee restrictions
+- Impact: Non-committee members can influence worker processes and spam sensitive gossip channels
+
+### Key Audit Questions
+
+- "Does content processing validate its source?" - Check if handlers verify origin context
+- "Can restricted content arrive through unrestricted channels?" - Test cross-topic attacks
+- "Are authorization and processing tightly coupled?" - Look for gaps between layers
