@@ -23,3 +23,26 @@ Architecture understanding
 - Issue: Documentation says `whole committee` gets zero delay in odd rounds, but code only gives zero delay to the single leader
 - Impact: Reduced network throughput in every odd round (50% of all rounds)
 - Root Cause: Function logic contradicts its own NatSpec comments - classic spec vs implementation mismatch
+
+## [M - primary: requested_parents DoS issue](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1095)
+
+### Note
+
+- Attack: Send headers for far-future rounds (999999) with fake parent certificates
+- Impact: Node tracks fake certificate requests forever → memory exhaustion → crash
+- Root Cause: No future round validation + garbage collection only removes old entries, not future ones
+
+### Prevention Checklist
+
+🔍 Key Red Flags
+
+- Unbounded collections (HashMap, Vec) that grow from external input
+- Missing validation on input size/range (especially temporal bounds)
+- Incomplete garbage collection (only removes old, not invalid future data)
+
+### ⚡ Quick Audit Questions
+
+- "What grows without limits?" - Find collections that accumulate data
+- "Can malicious input cause unbounded growth?" - Test edge cases
+- "Does cleanup handle all invalid cases?" - Check GC completeness
+- Golden Rule: External input → Internal storage growth = potential DoS vulnerability
