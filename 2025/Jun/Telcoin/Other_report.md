@@ -155,3 +155,18 @@ Message without source, any topic → REJECT
 - "Does content processing validate its source?" - Check if handlers verify origin context
 - "Can restricted content arrive through unrestricted channels?" - Test cross-topic attacks
 - "Are authorization and processing tightly coupled?" - Look for gaps between layers
+
+## [M - Malicious Consensus Header Response Permanently Disables Node State Synchronization](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/772)
+
+# Summary
+
+- Issue: Multiple validation gaps in consensus header sync allow malicious headers to be accepted and processed
+- Root Cause: Two-task sync architecture with inconsistent validation - tracking task has weak validation, streaming task has stronger validation but fatal error handling(process stopped when encountered incorrect digest)
+- Attack Vector: Send headers with valid signatures but wrong round certificates, malicious timestamps, or incorrect metadata
+- Impact: RPC API poisoning, execution engine manipulation, eventual sync termination when honest headers fail validation
+
+### Key Audit Questions
+
+"Are validation rules consistent across all processing paths?" - Compare validation depth between parallel tasks/components
+"Does any single bad input permanently disable functionality?" - Check for fatal error handling vs graceful retry mechanisms
+"Can validation be bypassed through alternative entry points?" - Map all ways external data enters the system and verify equivalent security checks
