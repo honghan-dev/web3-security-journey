@@ -63,3 +63,56 @@ Architecture understanding
 "What happens on restart between these phases?" - Check recovery mechanisms
 "Are there intermediate 'success' states that aren't final?" - Map all process phases
 "Does persistent storage match what gets recovered?" - Verify storage/recovery consistency
+
+## [M - Permanent leader selection bias creates distorted consensus reward distribution](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/865)
+
+## Issue Overview
+
+• **Bug Type**: Systematic bias in weighted random selection due to constrained seed space
+• **Root Cause**: Using only even numbers (0,2,4,6...) as RNG seeds + fixed validator ordering by BLS key
+• **Impact**: Certain committee positions get 13.44% vs 11.58% selection rates (should be 12.5% each)
+• **Attack Vector**: Validators can mine favorable BLS keys to land in advantaged committee positions
+
+## Two-Layer Architecture
+
+• **Committee Selection**: Random shuffling determines WHO gets into committee (fair)
+• **Leader Selection**: Within committee, validators ordered by BLS key create predictable bias (unfair)
+• **Key Point**: Random membership doesn't eliminate within-committee positional advantage
+
+## Bug Spotting Checklist
+
+### **Random Number Generation Red Flags**
+
+```rust
+// Look for:
+StdRng::from_seed(simple_sequential_value)    // Predictable seeds
+rng_seed = counter * 2                        // Constrained entropy space  
+seed_source = even_numbers_only               // Missing odd values
+```
+
+### **Deterministic Ordering Issues**
+
+```rust  
+// Watch for:
+map.values().collect()                        // Fixed iteration order
+sort_by_key(|item| item.public_key)          // Predictable sorting
+authorities.iter()                           // Consistent ordering
+```
+
+### **Selection Algorithm Bias**
+
+```rust
+// Red flags:
+choose_weighted() with deterministic RNG      // Systematic bias possible
+sequential_seeds + fixed_ordering             // Bias amplification  
+equal_weights + unequal_results              // Selection bias indicator
+```
+
+### **Key Audit Questions**
+
+1. **"Is the randomness source truly random?"** - Check for constrained seed spaces
+2. **"Does ordering affect selection probability?"** - Test if position matters
+3. **"Can participants influence their position?"** - Look for gaming vectors
+4. **"Are equal inputs producing equal outputs?"** - Verify fairness metrics
+
+**Golden Rule**: When deterministic ordering meets constrained randomness, systematic bias often emerges. Always test actual distribution vs expected distribution with statistical analysis.
