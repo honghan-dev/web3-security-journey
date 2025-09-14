@@ -137,7 +137,7 @@ equal_weights + unequal_results              // Selection bias indicator
 
 ### Summary
 
-- Issue: Topic-based access control can be bypassed by sending restricted content through permissionless topics
+- Issue: Topic-based access control can be bypassed by sending restricted content through permissionless topics(bypassing topic restricted message, `tn-txs` and `tn-worker`)
 - Root Cause: Authorization validates topic permissions but message processing ignores which topic content arrived on
 - Attack Vector: Send batch messages (committee-only) via "tn-txn" topic (permissionless) to bypass committee restrictions
 - Impact: Non-committee members can influence worker processes and spam sensitive gossip channels
