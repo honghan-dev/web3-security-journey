@@ -170,3 +170,18 @@ Message without source, any topic → REJECT
 "Are validation rules consistent across all processing paths?" - Compare validation depth between parallel tasks/components
 "Does any single bad input permanently disable functionality?" - Check for fatal error handling vs graceful retry mechanisms
 "Can validation be bypassed through alternative entry points?" - Map all ways external data enters the system and verify equivalent security checks
+
+## [M - Workers store gossiped batches without validation](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/761)
+
+## Summary
+
+- Issue: Batches fetched via gossip are stored without validation, while directly reported batches are properly validated
+- Root Cause: Two different code paths for batch storage with inconsistent validation requirements
+- Attack Vector: Gossip invalid batch digests to trigger automatic fetching and storage of malformed batches
+- Impact: Storage DoS (disk filled with invalid data) and network DoS (bandwidth wasted on invalid batch requests)
+
+### Key Audit Questions
+
+- "Do all data entry points have equivalent validation?" - Map every way data can enter storage and verify validation consistency
+- "Can automated/triggered actions bypass critical checks?" - Check gossip, sync, and automatic mechanisms for validation gaps
+- "Are there alternative paths to the same functionality?" - Identify if bypass routes exist around main validation logic
