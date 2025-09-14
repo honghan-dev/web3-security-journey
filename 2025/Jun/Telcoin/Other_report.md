@@ -46,3 +46,20 @@ Architecture understanding
 - "Can malicious input cause unbounded growth?" - Test edge cases
 - "Does cleanup handle all invalid cases?" - Check GC completeness
 - Golden Rule: External input → Internal storage growth = potential DoS vulnerability
+
+## [M - Transactions Are Removing From The Meme Pool Prematurely Which Results In Transaction Being Lost After Epoch Transitions](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/967)
+
+### Summary
+
+- Bug Type: Premature state cleanup with incomplete recovery mechanism
+- Issue: Transactions removed from mempool after batch validation but before blockchain inclusion
+- Root Cause: Missing recovery logic to restore pending batches after epoch transitions
+- Impact: Validated transactions permanently lost during epoch boundaries
+- Timing: Batch validation complete → Epoch transition → New proposer ignores stored batches
+
+### ⚡ Quick Audit Questions
+
+"When is data removed vs when is it actually committed?" - Look for timing gaps
+"What happens on restart between these phases?" - Check recovery mechanisms
+"Are there intermediate 'success' states that aren't final?" - Map all process phases
+"Does persistent storage match what gets recovered?" - Verify storage/recovery consistency
