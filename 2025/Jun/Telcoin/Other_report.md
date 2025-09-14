@@ -116,3 +116,19 @@ equal_weights + unequal_results              // Selection bias indicator
 4. **"Are equal inputs producing equal outputs?"** - Verify fairness metrics
 
 **Golden Rule**: When deterministic ordering meets constrained randomness, systematic bias often emerges. Always test actual distribution vs expected distribution with statistical analysis.
+
+## [M - Force burning a validator in the scheduled committees will reduce the size of future committees](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/846)
+
+### Summary
+
+- Issue: Ejecting malicious validators reduces committee size below BFT safety thresholds
+- Root Cause: System uses actual committee count instead of design target for next epoch sizing
+- Impact: BFT fault tolerance degrades (7→6 validators reduces tolerance from 2 to 1 faults)
+- Attack Vector: Forces system into vulnerable state where fewer Byzantine nodes can break consensus
+
+### Audit Questions
+
+- "Can security parameters degrade during operation?" - Check for minimum bounds
+- "What happens when validators are removed?" - Trace impact on BFT tolerance
+- "Are design assumptions enforced continuously?" - Verify parameter stability
+- "Can the system handle originally-planned fault scenarios after changes?" - Test degraded states
