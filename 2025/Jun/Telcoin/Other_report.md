@@ -142,6 +142,14 @@ equal_weights + unequal_results              // Selection bias indicator
 - Attack Vector: Send batch messages (committee-only) via "tn-txn" topic (permissionless) to bypass committee restrictions
 - Impact: Non-committee members can influence worker processes and spam sensitive gossip channels
 
+```rust
+Topic "tn-txn", auth=None, any sender → ACCEPT
+Topic "tn-worker", auth=Some({A,B,C}), sender=A → ACCEPT  
+Topic "tn-worker", auth=Some({A,B,C}), sender=D → REJECT
+Topic "unknown", any sender → REJECT
+Message without source, any topic → REJECT
+```
+
 ### Key Audit Questions
 
 - "Does content processing validate its source?" - Check if handlers verify origin context
