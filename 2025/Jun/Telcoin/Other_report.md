@@ -14,8 +14,6 @@
 2. Understand what data should persist in database, so node can retrieve if it restarts
 3. Critical consensus data must survive restarts, where individual node failures affect the whole network.
 
-### Takeaways
-
 ## [M - Logic error in Proposer's calc_min_delay() function leads to reduced network throughput](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1104)
 
 ### Summary
@@ -65,26 +63,21 @@ fn calc_min_delay(&self) -> Duration {
 
 ## [M - primary: requested_parents DoS issue](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1095)
 
-### Note
+### Summary
 
-- Attack: Send headers for far-future rounds (999999) with fake parent certificates
-- Impact: Node tracks fake certificate requests forever → memory exhaustion → crash
-- Root Cause: No future round validation + garbage collection only removes old entries, not future ones
+1. Malicious committee members can cause unbounded memory growth of requested_parents map by sending vote requests for arbitrarily future rounds.
+2. These entries stays forever in the memory, because garbage collection mechanism only removes entries from past rounds, didn't remove any unnecessary future rounds
 
-### Prevention Checklist
+### What went wrong and how to spot this
 
-🔍 Key Red Flags
+1. First understand what are the things that a node request from peers.
+2. What data structure the field has, (HashMap or Vec), and whether there are limit impose on it
+3. Understand how are those data being cleared. In this case, garbage collector only clears past rounds, but not future rounds.
 
-- Unbounded collections (HashMap, Vec) that grow from external input
-- Missing validation on input size/range (especially temporal bounds)
-- Incomplete garbage collection (only removes old, not invalid future data)
+### Key Takeaway
 
-### ⚡ Quick Audit Questions
-
-- "What grows without limits?" - Find collections that accumulate data
-- "Can malicious input cause unbounded growth?" - Test edge cases
-- "Does cleanup handle all invalid cases?" - Check GC completeness
-- Golden Rule: External input → Internal storage growth = potential DoS vulnerability
+1. Always ask how malicious node can DOS other nodes, when other node request data from them.
+2. Map out what are the data being request and respond between different nodes.
 
 ## [M - Transactions Are Removing From The Meme Pool Prematurely Which Results In Transaction Being Lost After Epoch Transitions](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/967)
 
