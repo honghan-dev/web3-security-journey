@@ -1,28 +1,67 @@
-# Other findings
+# Other findings that I've missed
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
 
-### Note
+### Summary
 
 - proposer maintains proposed headers in memory (`proposed_headers` map) but only persists the latest header to database (`last_proposed` table).
+- This becomes an issue because every Telcoin node maintains their own mempool, and not gossip to other node.
 - When a node restarts, all previously proposed but uncommitted headers are lost from memory and cannot be recovered, causing their transaction batches to never be rescheduled for inclusion.
-- This creates a responsibility gap where the proposer forgets its commitment to retry failed proposals, potentially leading to transaction delays until other proposers pick up the slack.
 
-### How to spot this bug
+### What went wrong and how to spot this
 
-Architecture understanding
+1. Didn't understand the proposer flow in detail.
+2. Understand what data should persist in database, so node can retrieve if it restarts
+3. Critical consensus data must survive restarts, where individual node failures affect the whole network.
 
-1. Understand the proposer system
-2. What Should Be Persistent -> Ask: "What breaks if this is lost on restart?"
-3. Critical consensus data must survive restarts, especially in multi-proposer systems where individual node failures affect the whole network.
+### Takeaways
 
 ## [M - Logic error in Proposer's calc_min_delay() function leads to reduced network throughput](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1104)
 
-### Note
+### Summary
 
-- Issue: Documentation says `whole committee` gets zero delay in odd rounds, but code only gives zero delay to the single leader
-- Impact: Reduced network throughput in every odd round (50% of all rounds)
-- Root Cause: Function logic contradicts its own NatSpec comments - classic spec vs implementation mismatch
+1. Telcoin implements time-based rounds for block proposal:
+
+- During even rounds, only the designated leader should propose a header (with zero delay)
+- During odd rounds, all committee members should propose headers with minimal delay to maximize the proposal rate
+
+2. Issue: Documentation says `whole committee` gets zero delay in odd rounds, but code only gives zero delay to the single leader because of this check
+
+```rust
+/// Calculate the min delay to use when resetting the min_delay_interval.
+///
+/// The min delay is reduced when this authority expects to become the leader of the next round.
+/// Reducing the min delay increases the chances of successfully committing a leader.
+///
+/// NOTE: If the next round is even, the leader schedule is used to identify the next leader. If
+/// the next round is odd, the whole committee is used in order to keep the proposal rate as
+/// high as possible (which leads to a higher round rates). Using the entire committee here also
+/// helps boost scores for weaker nodes that may be trying to resync.
+fn calc_min_delay(&self) -> Duration {
+    // check next round
+    let next_round = self.round + 1;
+
+    // compare:
+    // - leader schedule for even rounds
+    // - entire committee for odd rounds
+    //
+    // NOTE: committee size is asserted >1 during Committee::load()
+    if (next_round % 2 == 0
+        && self.leader_schedule.leader(next_round).id() == self.authority_id)
+@>      || (next_round % 2 != 0
+@>          && self.committee.leader(next_round as u64).id() == self.authority_id)
+    {
+        Duration::ZERO
+    } else {
+        self.min_header_delay
+    }
+}
+```
+
+### What went wrong and how to spot this
+
+1. Didn't understand round advancement flow enough
+2. Compare the function against what it documents says it will do.
 
 ## [M - primary: requested_parents DoS issue](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1095)
 
@@ -158,7 +197,7 @@ Message without source, any topic → REJECT
 
 ## [M - Malicious Consensus Header Response Permanently Disables Node State Synchronization](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/772)
 
-# Summary
+### Summary
 
 - Issue: Multiple validation gaps in consensus header sync allow malicious headers to be accepted and processed
 - Root Cause: Two-task sync architecture with inconsistent validation - tracking task has weak validation, streaming task has stronger validation but fatal error handling(process stopped when encountered incorrect digest)
@@ -173,7 +212,7 @@ Message without source, any topic → REJECT
 
 ## [M - Workers store gossiped batches without validation](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/761)
 
-## Summary
+### Summary
 
 - Issue: Batches fetched via gossip are stored without validation, while directly reported batches are properly validated
 - Root Cause: Two different code paths for batch storage with inconsistent validation requirements
@@ -185,3 +224,25 @@ Message without source, any topic → REJECT
 - "Do all data entry points have equivalent validation?" - Map every way data can enter storage and verify validation consistency
 - "Can automated/triggered actions bypass critical checks?" - Check gossip, sync, and automatic mechanisms for validation gaps
 - "Are there alternative paths to the same functionality?" - Identify if bypass routes exist around main validation logic
+
+## [M - Permanently stuck funds when validator is burned with a balance greater than the stakeAmount](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/888)
+
+### Summary
+
+- Issue: When burning validators with rewards, the burn function zeros out balance before unstaking, causing rewards to become permanently trapped in the contract
+- Root Cause: Premature balance zeroing before `_unstake()` calculates reward distribution
+- Impact: Protocol permanently loses validator rewards (can't redistribute to other validators or return to burned validator)
+- Financial Loss: Rewards remain forever inaccessible in ConsensusRegistry contract
+
+```solidity
+// State update in question
+state_variable = 0;
+```
+
+### Question to ask
+
+"Are balances or state variables zeroed before all fund distribution calculations?" - Look for balance = 0 or similar before calculations that depend on original balance
+"Do functions that handle both principal and rewards calculate both amounts before modifying state?" - Check if reward calculations happen after state clearing
+"Can any funds become permanently inaccessible due to calculation order dependencies?" - Trace whether all fund components have explicit distribution paths
+
+## []
