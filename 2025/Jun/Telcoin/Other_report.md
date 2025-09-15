@@ -409,36 +409,31 @@ Message without source, any topic → REJECT
 
 ### Summary
 
-- Issue: Batches fetched via gossip are stored without validation, while directly reported batches are properly validated
-- Root Cause: Two different code paths for batch storage with inconsistent validation requirements
-- Attack Vector: Gossip invalid batch digests to trigger automatic fetching and storage of malformed batches
-- Impact: Storage DoS (disk filled with invalid data) and network DoS (bandwidth wasted on invalid batch requests)
+1. Storing fetched batches via gossip without validation, while directly reported batches are properly validated.
+2. Root Cause: Two different code paths for batch storage with inconsistent validation requirements
+3. ossip invalid batch digests to trigger automatic fetching and storage of malformed batches
+4. Storage DoS (disk filled with invalid data) and network DoS (bandwidth wasted on invalid batch requests)
 
-### Key Audit Questions
+### How to spot this
 
-- "Do all data entry points have equivalent validation?" - Map every way data can enter storage and verify validation consistency
-- "Can automated/triggered actions bypass critical checks?" - Check gossip, sync, and automatic mechanisms for validation gaps
-- "Are there alternative paths to the same functionality?" - Identify if bypass routes exist around main validation logic
+1. Critical data such as block header fetched from other node should go through validation before inserting in storage.
+2. Trace for any alternate path that node receive data, eg. restart, network partition.
 
 ## [M - Permanently stuck funds when validator is burned with a balance greater than the stakeAmount](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/888)
 
 ### Summary
 
-- Issue: When burning validators with rewards, the burn function zeros out balance before unstaking, causing rewards to become permanently trapped in the contract
-- Root Cause: Premature balance zeroing before `_unstake()` calculates reward distribution
-- Impact: Protocol permanently loses validator rewards (can't redistribute to other validators or return to burned validator)
-- Financial Loss: Rewards remain forever inaccessible in ConsensusRegistry contract
+1. When slashing a validators, the burn function zeros out balance before unstaking, causing rewards to become permanently trapped in the contract
 
 ```solidity
 // State update in question
 state_variable = 0;
 ```
 
-### Question to ask
+### What went wrong and how to spot the bug
 
-"Are balances or state variables zeroed before all fund distribution calculations?" - Look for balance = 0 or similar before calculations that depend on original balance
-"Do functions that handle both principal and rewards calculate both amounts before modifying state?" - Check if reward calculations happen after state clearing
-"Can any funds become permanently inaccessible due to calculation order dependencies?" - Trace whether all fund components have explicit distribution paths
+1. Wasn't aware that slashing should only affect validator's initial stake, but the entire amount including reward.
+2. Take note of documentation, whether it only slashing initial amount or the entire amount including reward.
 
 ## [Incorrect calculation of max rejected stake leads to premature batch rejection](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/722)
 
@@ -449,6 +444,6 @@ to be low.
 
 ### What went wrong and how to spot them
 
-1. `available_stake` missing out proposer's amount, it only include stake amount from other validators
+1. `available_stake` missed out proposer's amount, it only include stake amount from other validators
 2. Didn't keep track of what fields each struct holds. `Authority & committee` Didn't understand that the function only loops through other validator for the available stake, but didn't get the proposer's stake. Hence the amount is missed out.
 3. Understand the flow of proposer during each round.
