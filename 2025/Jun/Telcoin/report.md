@@ -204,6 +204,10 @@ delegations[validatorAddress] = Delegation(
 
 # Other findings that I've missed
 
+# High Findings
+
+# Medium Findings
+
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
 
 ### Summary
