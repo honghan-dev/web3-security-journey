@@ -451,3 +451,34 @@ to be low.
 1. `available_stake` missed out proposer's amount, it only include stake amount from other validators
 2. Didn't keep track of what fields each struct holds. `Authority & committee` Didn't understand that the function only loops through other validator for the available stake, but didn't get the proposer's stake. Hence the amount is missed out.
 3. Understand the flow of proposer during each round.
+
+## [Database disconnection when catching up gas accumulator mid-epoch causes node failure](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/699)
+
+### @TODO
+
+## [Observer crash during peer rotation when peer list is empty](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/694)
+
+### Summary
+
+1. The network enforces a restrictive peer limit defined by `config.target_num_peers`, `prune_connected_peers()` is called to aggressively disconnect peers.
+2. Inadvertently creates a race condition where the `prune_connected_peers()` could remove all peers leaving the `connected_peers` empty.
+3. And when `rotate_left` is called on an empty `VecDeque` list, it causes panic and the node to crash
+
+### How to spot them
+
+1. Know the data structure
+    - VecDeque is a growable ring buffer.
+    - Insert/remove at head or tail is O(1), but calling methods like `rotate_left` assumes non-empty.
+
+2. Trace lifecycle of the collection
+    - Start (bootstrap phase): can it be empty before the first peer joins?
+    - Runtime (steady state): can pruning, disconnection, or errors reduce it to zero?
+    - Can pruning + disconnects happen together → empty VecDeque?
+
+3. Check assumptions before operations
+    - Any operation that requires len > 0 (like rotate_left, indexing, popping, front/back) should be guarded.
+    - Add defensive checks (if !is_empty() { ... }).
+
+4. Think in race conditions
+    - Peer list can shrink between scheduling and execution of rotation.
+    - Even if you checked len > 0, a concurrent prune/disconnect could empty it before rotate_left.
