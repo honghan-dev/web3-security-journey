@@ -206,6 +206,48 @@ delegations[validatorAddress] = Delegation(
 
 # High Findings
 
+## [H - Nodes can be slashed for requesting large P2P data](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1023)
+
+### Summary
+
+1. Caused by having a `max_rpc_message_size` (1mb)
+2. Node A requesting missing batch from Node B, if the batch size request is `>` 1mb, Node B's respond can't go through due to:
+
+```rust
+if self.decode_buffer.len() > self.max_chunk_size {
+    return Err(std::io::Error::other("encode data > max_chunk_size"));
+}
+```
+
+3. Then the system will penalize Node B for failing to respond
+
+```rust
+ReqResEvent::OutboundFailure { peer, .. } => {
+    self.swarm.behaviour_mut().peer_manager.process_penalty(peer, Penalty::Medium);
+}
+```
+
+### Why I miss this and how to spot this
+
+1. Didn't understand the `request/respond` flow when a node needs additional batch data.
+2. Didn't know what happens when a node requested a large batch of data, and didn't trace the batch data flow in detail
+3. In `request/respond` crate, check if there's any cap(important for protection), but also what if the limit is triggered?
+
+## [Complete consensus takeover due to missing BLS proof of possession verification](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/845)
+
+### Summary
+
+1. Protocol didn't verify validator's proof of procession when validator join using their BLS key
+2. Malicious can reverse engineer to figure out the rouge key. `PK_rogue = PK_target - (PK₁ + PK₂ + ... + PKₙ)`
+3. Then submit this rogue key `Aggregate = PK₁ + PK₂ + ... + PKₙ + PK_rogue = PK_target` as their own BLS key.
+4. This allow them to take over the consensus
+
+### Why I miss this and how to spot this
+
+1. I didn't understand how BLS works [(read here for some write up on how BLS works)](https://github.com/honghan-dev/web3-security-notes/blob/master/Cryptography/bls.md)
+2. Didn't notice protocol didn't have any POP(Proof of Possession) validation before allowing Validator add their key.
+3. Look for input validation when validator registers. Ensure validator actually owns the key before adding them.
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
