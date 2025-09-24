@@ -339,6 +339,18 @@ pub(crate) async fn retrieve_missing_certs(
 2. Input validation check on retrieving large data.
 3. Ensure data that retrieve from node has a limit, else it will cause DOS due to OOM(out of memory)
 
+## [H - On-chain triggered stake with invalid BLS public key will crash the network](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/74)
+
+### Summary
+
+1. Methods within the `run_epochs` didn't handle the error caused by an invalid bls key from a node well, eventually bubble up to `run_epochs` and shut down the node
+2. The error can be caused by `BlsPublicKey::from_literal_bytes`, if a node provide an invalid bls key
+
+### Why I miss and how to spot
+
+1. Didn't trace through what could happen when a certain action fails (especially data that can be manipulated by users), with no proper error handling, the node will crash.
+2. Check how the method handles if there's any error, mainly on data that provided by user. (Input validation)
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
