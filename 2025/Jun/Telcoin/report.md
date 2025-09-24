@@ -270,12 +270,51 @@ ReqResEvent::OutboundFailure { peer, .. } => {
 
 ```rust
 let batch_size = stored_batch.size(); // (*)
+
+// Output: size_of(Batch) = 120 (on 64-bit)
 ```
 
 ### Why I miss and how to spot
 
-1. Didn't understand what `std::mem::size::<Batch>()` returns. It only returns a static len of the `container` in the stack, while didn't return the data size in the `heap`
+1. Didn't understand what `std::mem::size::<Batch>()` returns. It only returns a static len of the `container` in the stack, while didn't return the data size in the `heap`.
+
+```rust
+std::mem::size_of::<Batch>() (or size_of_val) only counts the fixed layout of the struct on the stack.
+```
+
 2. Batch received from other node is critical. Validation on the sender, batch size, batch correctness is important.
+
+## [H - A vulnerability in epoch transition when handle block with multiple batches could lead to network halt](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/615)
+
+### Summary
+
+1. When closing an epoch, the last index of a multiple batches is assigned with `close_epoch = true`
+
+```rust
+    pub fn epoch_closing_index(&self) -> Option<usize> {
+        // handle edge case for no batches at epoch boundary
+        self.close_epoch.then(|| self.batch_digests.len().saturating_sub(1))
+        // batch_digest.len() - 1;
+    }
+
+    // and the next check
+    if batch_index == last_index {
+        // mark this batch as the closing one
+    }
+```
+
+2. However, when iterating through the batch digests, it uses `VecDeque::pop_front()` removing the element from the vector at the same time. Hence, marking the `close_epoch` at the incorrect index.
+
+```rust
+    pub fn next_batch_digest(&mut self) -> Option<BlockHash> {
+        self.batch_digests.pop_front()
+    }
+```
+
+### Why I miss and how to spot
+
+1. Didn't understand how the `batch_digest` data type, and didn't know what `pop_front()` (popping off the first element in a `VecDeque`).
+2. Important to ensure indexing on crucial data is done correctly. Any attempt that changes the data len will affect indexing. Pay more attention to any mutation while accessing data.
 
 # Medium Findings
 
