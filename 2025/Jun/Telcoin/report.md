@@ -244,9 +244,22 @@ ReqResEvent::OutboundFailure { peer, .. } => {
 
 ### Why I miss this and how to spot this
 
-1. I didn't understand how BLS works [(read here for some write up on how BLS works)](https://github.com/honghan-dev/web3-security-notes/blob/master/Cryptography/bls.md)
+1. I didn't understand how BLS works. [read here](https://github.com/honghan-dev/web3-security-notes/blob/master/Cryptography/bls.md) for some simple write up on how BLS works.
 2. Didn't notice protocol didn't have any POP(Proof of Possession) validation before allowing Validator add their key.
 3. Look for input validation when validator registers. Ensure validator actually owns the key before adding them.
+
+## [Lack of authentication mechanism for transaction batches](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/745)
+
+### Summary
+
+1. Batches published by worker P2P doesn't have a mechanism to ensure it is sent by an approved Validators.
+2. `validate_batch()` check only if the batch is well-formed without enforcing authentication, any connected peer can submit batches.
+3. This could lead to unbounded storage consumption on the node.
+
+### Why I miss this and how to spot this
+
+1. Didn't check whether node validates the sender before accepting.
+2. Ensure that node validates the batch, and also validates whether the sender is approved. (This can filter out many other unapproved nodes from sending)
 
 # Medium Findings
 
