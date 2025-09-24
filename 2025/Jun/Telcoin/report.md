@@ -261,6 +261,22 @@ ReqResEvent::OutboundFailure { peer, .. } => {
 1. Didn't check whether node validates the sender before accepting.
 2. Ensure that node validates the batch, and also validates whether the sender is approved. (This can filter out many other unapproved nodes from sending)
 
+## [H - Memory exhaustion caused by improper handling RequestBatches request](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/716)
+
+### Summary
+
+1. Node has `MAX_REQUEST_BATCHES_RESPONSE_SIZE` to prevent overloaded with batches.
+2. However, the method using `std::mem::size_of::<Batch>()` of the batch to check the exact size. `std::mem::size_of::<Batch>()` will always return the size of the `container` in the stack, but not the actual data length.
+
+```rust
+let batch_size = stored_batch.size(); // (*)
+```
+
+### Why I miss and how to spot
+
+1. Didn't understand what `std::mem::size::<Batch>()` returns. It only returns a static len of the `container` in the stack, while didn't return the data size in the `heap`
+2. Batch received from other node is critical. Validation on the sender, batch size, batch correctness is important.
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
