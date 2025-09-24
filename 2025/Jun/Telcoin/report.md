@@ -316,6 +316,29 @@ std::mem::size_of::<Batch>() (or size_of_val) only counts the fixed layout of th
 1. Didn't understand how the `batch_digest` data type, and didn't know what `pop_front()` (popping off the first element in a `VecDeque`).
 2. Important to ensure indexing on crucial data is done correctly. Any attempt that changes the data len will affect indexing. Pay more attention to any mutation while accessing data.
 
+## [H - Telcoin node remote denial of service](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/30)
+
+### Summary
+
+1. Primary node can request missing certification from other peers via `MissingCertificates` request
+2. There's not max items retrieval bound check in `retrive_missing_cert` method, hence malicious node could send large data
+
+```rust
+pub(crate) async fn retrieve_missing_certs(
+    &self,
+    request: MissingCertificatesRequest, /// @audit Max_items is being passed directly by peer
+) -> PrimaryNetworkResult<PrimaryResponse> {
+    // Create a time-bounded iter for collecting certificates
+    let mut missing = Vec::with_capacity(request.max_items);
+}
+```
+
+### Why I miss and how to spot
+
+1. Didn't understand enough the entire catch up flow. (How node catch up when they have missing data)
+2. Input validation check on retrieving large data.
+3. Ensure data that retrieve from node has a limit, else it will cause DOS due to OOM(out of memory)
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
