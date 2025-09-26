@@ -355,8 +355,9 @@ pub(crate) async fn retrieve_missing_certs(
 
 ### Summary
 
-1. Protocol implements anti-quorum protection to prevent malicious validators from blocking consensus by accumulate rejection stakes.
-2. `QuorumWaiter` method incorrectly decrement stake from `rejected_stake` rather than increment it leading to overflow and chain halt due to `rejected_stake` > `max_rejected_stake`
+1. Vulnerability Category - `overflow & underflow`
+2. Protocol implements anti-quorum protection to prevent malicious validators from blocking consensus by accumulate rejection stakes.
+3. `QuorumWaiter` method incorrectly decrement stake from `rejected_stake` rather than increment, causing **underflow** and wrap around, which can lead to a chain halt due to `rejected_stake` > `max_rejected_stake`
 
 ### What I miss and how to spot
 
