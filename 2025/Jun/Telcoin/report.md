@@ -351,6 +351,18 @@ pub(crate) async fn retrieve_missing_certs(
 1. Didn't trace through what could happen when a certain action fails (especially data that can be manipulated by users), with no proper error handling, the node will crash.
 2. Check how the method handles if there's any error, mainly on data that provided by user. (Input validation)
 
+## [Single validator can halt consensus](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/165)
+
+### Summary
+
+1. Protocol implements anti-quorum protection to prevent malicious validators from blocking consensus by accumulate rejection stakes.
+2. `QuorumWaiter` method incorrectly decrement stake from `rejected_stake` rather than increment it leading to overflow and chain halt due to `rejected_stake` > `max_rejected_stake`
+
+### What I miss and how to spot
+
+1. Didn't understand how Quorum was formed, didn't keep track of the quorum acceptance and rejection flow.
+2. Didn't have time to go through this particular functionality
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
