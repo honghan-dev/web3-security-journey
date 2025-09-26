@@ -351,7 +351,7 @@ pub(crate) async fn retrieve_missing_certs(
 1. Didn't trace through what could happen when a certain action fails (especially data that can be manipulated by users), with no proper error handling, the node will crash.
 2. Check how the method handles if there's any error, mainly on data that provided by user. (Input validation)
 
-## [Single validator can halt consensus](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/165)
+## [Single validator can halt consensus](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/165) (due to underflow)
 
 ### Summary
 
@@ -362,7 +362,20 @@ pub(crate) async fn retrieve_missing_certs(
 ### What I miss and how to spot
 
 1. Didn't understand how Quorum was formed, didn't keep track of the quorum acceptance and rejection flow.
-2. Didn't have time to go through this particular functionality
+2. Ensure all arithmetics `+ - * /` are check not underflow, overflow, and round to zero.
+
+## [H - DOS through high gas limit declarations](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/174)
+
+### Summary
+
+1. Vulnerable Category - `Input validation`.
+2. `BatchBuilder::add_pool_transactions` method includes transactions solely based on declared gas limit, without checking the actual gas used. The declared gas limit is used directly in the gas used calculation in a block, which doesn't reflect the actual gas used.
+3. Malicious actor can submit a transaction with ~=30m gas declared, but in actual only uses 21_000 gas for a simple transfer.
+
+### Why I missed and how to spot this
+
+1. Didn't understand how to gas limit provide works in the protocol, how the protocol uses that value to determine how many transactions in a block
+2. Trace how gas is calculated in a block.
 
 # Medium Findings
 
