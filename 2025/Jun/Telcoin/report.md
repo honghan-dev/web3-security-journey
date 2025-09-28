@@ -377,6 +377,21 @@ pub(crate) async fn retrieve_missing_certs(
 1. Didn't understand how to gas limit provide works in the protocol, how the protocol uses that value to determine how many transactions in a block
 2. Trace how gas is calculated in a block.
 
+## [Insecure network discovery mechanism used by CVV allow attacker to halt the chain](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/179)
+
+### Summary
+
+1. At each epoch transition, `EpochManager` creates a committee for the next epoch by querying `ConsensusRegistry` contract. It uses `libp2p` Kademlia DHT to query for any peer with that BLS key to retrieve their `multiaddr`.
+2. Before DHT performs remote lookup, it first check its local DHT storage(on the node) and it skips the query if the key exists.
+3. Issue arise when the local DHT can be updated by any connected peers(unrestricted).
+4. If enough fake records, it disrupt the Quorum formation, thus network will stall.
+
+### Why I missed and how to spot this
+
+1. Didn't understand the `libp2p` Kademlia DHT works, and didn't check how connecting to peer flow works.
+2. Ensure only valid BLS key can be inserted into `NodeRecord`
+3. Important to ensure components that related to `QC` formation are check, including valid peers in the network.
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
