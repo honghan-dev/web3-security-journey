@@ -392,6 +392,20 @@ pub(crate) async fn retrieve_missing_certs(
 2. Ensure only valid BLS key can be inserted into `NodeRecord`
 3. Important to ensure components that related to `QC` formation are check, including valid peers in the network.
 
+## [Insecure CVV discovery mechanism that allow attacker to manipulate validator committee](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/199)
+
+### Summary
+
+1. Category - Input validation
+2. At the end of each epoch, node will query peers to obtain their detail `NodeRecord`
+3. Although the node checks that the `record.key == BLS_PEER`, but it didn't verify the `NodeRecord` data received, so malicious node can respond with arbitrary data.
+
+### Why I missed and how to spot this
+
+1. Didn't understand the `NodeRecord` flow, how the system store `NodeRecord(Peer data)` and the system flow in querying other peer their identify and BLS key.
+2. Ensure data received from other peer is valid, include the peer's identity. If peers identity is invalid, it can affect validator committee, thus causing chain halt.
+3. Ensure anything that could affect committee formation is verified and validated.
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
