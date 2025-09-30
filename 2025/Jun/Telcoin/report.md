@@ -377,7 +377,7 @@ pub(crate) async fn retrieve_missing_certs(
 1. Didn't understand how to gas limit provide works in the protocol, how the protocol uses that value to determine how many transactions in a block
 2. Trace how gas is calculated in a block.
 
-## [Insecure network discovery mechanism used by CVV allow attacker to halt the chain](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/179)
+## [H - Insecure network discovery mechanism used by CVV allow attacker to halt the chain](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/179)
 
 ### Summary
 
@@ -392,7 +392,7 @@ pub(crate) async fn retrieve_missing_certs(
 2. Ensure only valid BLS key can be inserted into `NodeRecord`
 3. Important to ensure components that related to `QC` formation are check, including valid peers in the network.
 
-## [Insecure CVV discovery mechanism that allow attacker to manipulate validator committee](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/199)
+## [H - Insecure CVV discovery mechanism that allow attacker to manipulate validator committee](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/199)
 
 ### Summary
 
@@ -405,6 +405,55 @@ pub(crate) async fn retrieve_missing_certs(
 1. Didn't understand the `NodeRecord` flow, how the system store `NodeRecord(Peer data)` and the system flow in querying other peer their identify and BLS key.
 2. Ensure data received from other peer is valid, include the peer's identity. If peers identity is invalid, it can affect validator committee, thus causing chain halt.
 3. Ensure anything that could affect committee formation is verified and validated.
+
+## [H - Integer overflow in batch gas validation can lead to network halt](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/238)
+
+### Summary
+
+1. **Category - Integer OVerflow**
+2. Before validators accept transactions in a batch, the system validates gas usage of all transactions. The gas limit can overflow if malicious actor submits an extremely large gas limit.
+3. When gas limit then wraps around, and passes the `total_possible_gas > max_tx_gas(30M in EVM)` check.
+4. When the execution trying to execute that particular transaction, it will fail. The network will halt if enough node get affected.
+5. Attack requires: building batch with custom gas limited beyond normal limits, bypassing the mempool checks, submitting it directly to consensus. Only validator has that capability to perform attack
+
+```rust
+fn validate_batch_gas(
+    // CODE OMITTED //
+) -> BatchValidationResult<()> {
+    // calculate total using tx gas limit
+    let total_possible_gas = transactions
+        .iter()
+        .map(|tx| tx.gas_limit())
+@>       .reduce(|total, size| total + size) // vulnerable to integer overflow
+        .ok_or(BatchValidationError::EmptyBatch)?;
+```
+
+### Why I missed and how to spot this
+
+1. Didn't pay attention to addition in a loop.
+2. Always ensure any add or subtract don't cause overflow or underflow, ensure they use `checked_add` or `checked_sub`.
+3. Always becareful when accepting transactions, malicious user can submit anything.
+
+## [H - Worker PeerExchange DoS](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/244)
+
+### Summary
+
+1. **Category - Denial of Service**
+2. Worker can receives an unbounded `PeerExchange` message from other worker.
+3. This causes OOM(out of memory) on node.
+
+```rust
+pub struct PeerExchangeMap(
+    #[serde_as(as = "HashMap<DisplayFromStr, HashSet<DisplayFromStr>>")]
+    pub  HashMap<PeerId, HashSet<Multiaddr>>,
+);
+```
+
+### Why I miss this and how to spot this
+
+1. Didn't have good understand of the Peer discover flow, what data is requested from other node
+2. Understand how the peer discovery mechanism works, and what data is being requested form other node.
+3. Ensure there are validate/verification/authorization on data that received from other nodes.
 
 # Medium Findings
 
