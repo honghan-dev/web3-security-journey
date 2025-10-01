@@ -455,6 +455,33 @@ pub struct PeerExchangeMap(
 2. Understand how the peer discovery mechanism works, and what data is being requested form other node.
 3. Ensure there are validate/verification/authorization on data that received from other nodes.
 
+## [H - Lack of Issuance contract definition in genesis file cause rewards loss](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/372)
+
+### Summary
+
+1. **Category - Initialization Mismatch**
+2. Both contracts `ConsensusRegistry` and `Issuance` are included when the protocol is building its genesis block.
+3. `Genesis::create_consensus_registry_genesis_account` didn't include `Issuance` contract during the build up, causing reward issue.
+
+It includes the `ConsensusRegistry` contract but not the `Issuance` contract
+
+```rust
+
+    let genesis = genesis.extend_accounts([(
+        CONSENSUS_REGISTRY_ADDRESS,
+        GenesisAccount::default()
+            .with_balance(U256::from(total_stake_balance))
+            .with_code(Some(registry_runtimecode.into()))
+            .with_storage(tmp_storage),
+    )]);
+```
+
+### Why I miss this and how to spot this
+
+1. Didn't understand the Genesis block deployment flow
+2. Check how many contracts are deployed and ensure all of them are included in the `Genesis` block.
+3. Contracts are simulated using `REVM` and include in the Genesis, any contracts that wasn't include, will not be available when deployed.
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
