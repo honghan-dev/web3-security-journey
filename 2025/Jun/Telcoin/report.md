@@ -482,6 +482,46 @@ It includes the `ConsensusRegistry` contract but not the `Issuance` contract
 2. Check how many contracts are deployed and ensure all of them are included in the `Genesis` block.
 3. Contracts are simulated using `REVM` and include in the Genesis, any contracts that wasn't include, will not be available when deployed.
 
+## [H - catchup_accumulator() incorrectly specifies start block to catch up](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/592)
+
+### Summary
+
+1. **Category - Incorrect Field**
+2. `catchup_accumulator` - When a validator node restarts, it needs to re-compute the per-validator reward counters (GasAccumulator / RewardsCounter) for the blocks that were finalized in the current epoch so far. Those counters are then used later (end of epoch) to call `applyIncentives()` (a system EVM call) that updates on-chain state. The re-computation must exactly match what a continuously-running node would have. So `catchup_accumulator()` must iterate over the block numbers from epoch start block up to the node’s finalized tip, and count/accumulate whatever per-block reward metrics are needed.
+3. `epoch_state` is incorrectly used in a block range, querying incorrect blocks. The reward counter is later used by execution engine to produce a system call `applyIncentives()` at the end of epoch.
+4. An invalid reward counter leads to an incorrect state root, ultimately causing the block to be invalid
+
+```rust
+fn catchup_accumulator<DB: TNDatabase>(
+    // CODE OMITTED //
+) -> eyre::Result<()> {
+    if let Some(block) = reth_env.finalized_header()? {
+        let epoch_state = reth_env.epoch_state_from_canonical_tip()?;
+        gas_accumulator
+            .base_fee(0)
+            .set_base_fee(block.base_fee_per_gas.unwrap_or(MIN_PROTOCOL_BASE_FEE));
+        // @audit Epoch start which is a timestamp being used incorrectly in Block Range
+        let blocks = reth_env.blocks_for_range(epoch_state.epoch_start..=block.number)?; // INCORRECT
+        let mut consensus_leaders: HashMap<B256, AuthorityIdentifier> = HashMap::default();
+        for current in blocks {
+            // accumulate reward counter
+        }
+    }
+}
+```
+
+### Why I miss this and how to spot this
+
+1. Didn't understand what this catchup accumulator do, what field it used to query for blocks.
+2. Ensure function uses correct field for block range in querying block.
+3. This is a classis missed bug that should be avoided
+
+## []()
+
+### Summary
+
+### Why I miss this and how to spot this
+
 # Medium Findings
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
