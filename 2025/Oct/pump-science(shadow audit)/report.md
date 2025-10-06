@@ -43,6 +43,8 @@
 
 3. Check how the authority process works in any function call.
 
+# Medium Findings
+
 ## [H - Missing Update of migration_token_allocation on Global Struct](https://code4rena.com/audits/2025-01-pump-science/submissions/F-583)
 
 ### Summary
@@ -60,8 +62,8 @@
 
 ### Summary
 
-1. After swap invariant check, actual native sol amount shouldn't be less than sol reserves in ledger.
-2. `sol_escrow.lamports()` would include the rent amount hence causing the `sol_escrow` larger, passing some checks that should result in error.
+1. After swap invariant check- actual native sol amount shouldn't be less than sol reserves in ledger.
+2. `sol_escrow.lamports()` would include the rent exempt hence causing the `sol_escrow` larger, passing some checks that should result in error.
 
 ```rust
 // Get raw lamports which includes rent
@@ -76,3 +78,15 @@ if sol_escrow_lamports < bonding_curve.real_sol_reserves {
 
 1. Didn't understand Solana's rent exempt model. Every PDA created will contain `rent-exempt` amount (**approx 890,880 lamports**)
 2. Might have to deduct the rent exempt amount before using it for comparison.
+
+## [M - Abrupt fee transition from 8.76% to 1% at slot 250 due to incorrect linear decrease formula](https://code4rena.com/audits/2025-01-pump-science/submissions/F-616)
+
+### Summary
+
+1. Fee transition creates a significant 7.76% economic discontinuity at slot 250-251 boundary, causing incorrect fees implementation as protocol intended.
+2. The incorrect calculation result in not a smooth fee curve.
+
+### Why I missed and how to spot it
+
+1. I didn't think that this is significant.
+2. Should report any discrepancies between the functionality and the intention. Documentation highlights a smooth curve instead of a sudden drop.
