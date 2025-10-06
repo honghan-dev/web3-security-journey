@@ -90,3 +90,41 @@ if sol_escrow_lamports < bonding_curve.real_sol_reserves {
 
 1. I didn't think that this is significant.
 2. Should report any discrepancies between the functionality and the intention. Documentation highlights a smooth curve instead of a sudden drop.
+
+## Low findings
+
+### Precision loss related issue
+
+1. Arithmetic operation steps can cause fee to truncate. Lesser fee charge on user.
+
+```rust
+let fee_bps = (-8_300_000_i64)
+    .checked_mul(slots_passed as i64)
+    .ok_or(ContractError::ArithmeticError)?
+    .checked_add(2_162_600_000)
+    .ok_or(ContractError::ArithmeticError)?
+    .checked_div(100_000)
+    .ok_or(ContractError::ArithmeticError)?;
+    // @note dividing 100_000 here can cause truncation
+
+    sol_fee = bps_mul(fee_bps as u64, amount, 10_000).unwrap();
+
+    // (-8300000 * 200 + 2162600000) / 100000 = 4963
+    // Actual calculation should be: 49.63%
+    // But due to integer division, it becomes 49%
+```
+
+### Gas fee related issue
+
+1. 0.04 sol hardcoded gas value, transaction might revert during network congestion
+
+```rust
+let token_a_amount = ctx
+    .accounts
+    .bonding_curve
+    .real_sol_reserves
+    .checked_sub(ctx.accounts.global.migrate_fee_amount)
+    .ok_or(ContractError::ArithmeticError)?
+    .checked_sub(40_000_000)  // Hardcoded 0.04 SOL for gas
+    .ok_or(ContractError::ArithmeticError)?;
+```
