@@ -204,7 +204,7 @@ delegations[validatorAddress] = Delegation(
 
 # Other findings that I've missed
 
-# High Findings
+# High Findings (Total - 19)
 
 ## [H - Nodes can be slashed for requesting large P2P data](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1023)
 
@@ -426,6 +426,7 @@ fn validate_batch_gas(
         .map(|tx| tx.gas_limit())
 @>       .reduce(|total, size| total + size) // vulnerable to integer overflow
         .ok_or(BatchValidationError::EmptyBatch)?;
+}
 ```
 
 ### Why I missed and how to spot this
