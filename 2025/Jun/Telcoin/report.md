@@ -523,7 +523,7 @@ fn catchup_accumulator<DB: TNDatabase>(
 
 ### Why I miss this and how to spot this
 
-# Medium Findings
+# Medium Findings (Total - 24)
 
 ## [M - Non-persistent header tracking leads to transaction loss on node restart](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/1177)
 
@@ -799,3 +799,35 @@ to be low.
 4. Think in race conditions
     - Peer list can shrink between scheduling and execution of rotation.
     - Even if you checked len > 0, a concurrent prune/disconnect could empty it before rotate_left.
+
+## [M - Validators Can Escape Slashing by Timing Exit with Epoch Boundaries](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/2)
+
+### Summary
+
+1. A validator can call `ConsensusRegistry.beginExit()`, commit malicious actions in the final block then immediately withdraw their stake in the next epoch, avoiding slashing.
+2. This is due to the committee update flow. A validator `beginExit()` while still being an active committee member, their status changed to `ValidatorStatus.PendingExit`. `_updateEpochInfo()` being called first increment the `epochPointer` to new committee.
+3. The malicious actor will pass the `_exit()` check, changing their status to `Exited`.
+4. After that the actor can call `unstake()` and withdraw their entire stake
+5. Recommendation: update `_updateValidatorQueue` first before `_updateEpochInfo`.
+
+### Why I missed and how to spot it
+
+1. Didn't understand the epoch closing committee transition(epoch lifecycle) and staking and unstaking flow.
+2. Missed out the flow on validators `exit()` status transition.
+3. Few questions to ask: `Which validators are in which committee before and after epoch transition`
+4. Validator status flow: `Staked → Active → PendingExit → Exited → (can unstake)`
+
+## [M - Validators can avoid being fully slashed or having their NFT burned by reverting on receive()](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/40)
+
+### Summary
+
+1. Malicious validator can avoid slashing by reverting on the reward sent by the protocol.
+2. The slashing or burn flow: `applySlashes` OR `burn()` => `_consensusBurn()` => `_unstake()` called to return stake + rewards => `distributeStakeReward()` makes external call => `recipient.call{value: totalAmount}("")`.
+3. Classic DOS technique by reverting on `receive()` function
+4. Recommendation: should use `pull` pattern from user rather than `push` pattern.
+
+### Why I missed and how to spot this
+
+1. Didn't trace in detail the slashing and burn mechanism. Contract can revert when received fund, and possibly revert on the entire transaction, causing DOS.
+2. Beware of push method(sending fund to address), instead use pull method(user request for fund).
+3. Check that what happens when the call to user revert, what impact does it has?
