@@ -824,10 +824,106 @@ to be low.
 1. Malicious validator can avoid slashing by reverting on the reward sent by the protocol.
 2. The slashing or burn flow: `applySlashes` OR `burn()` => `_consensusBurn()` => `_unstake()` called to return stake + rewards => `distributeStakeReward()` makes external call => `recipient.call{value: totalAmount}("")`.
 3. Classic DOS technique by reverting on `receive()` function
-4. Recommendation: should use `pull` pattern from user rather than `push` pattern.
+4. Recommendation: should use `pull` pattern from user rather than `push` pattern. Or use `WTEL` ERC20 token, ERC20 token doesn't go through `receive` function.
 
 ### Why I missed and how to spot this
 
-1. Didn't trace in detail the slashing and burn mechanism. Contract can revert when received fund, and possibly revert on the entire transaction, causing DOS.
+1. Didn't pay enough attention to the slashing and burn mechanism. Contract can revert when received fund, and possibly revert on the entire transaction, causing DOS.
 2. Beware of push method(sending fund to address), instead use pull method(user request for fund).
 3. Check that what happens when the call to user revert, what impact does it has?
+
+## [M - The same BLS pubkeys can be registered to 2 validators](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/41)
+
+### Summary
+
+1. `ConsensusRegistry` didn't set the bls keys mapping `usedBlsPubkeys` to `true` in constructor.
+2. Other validators can use the same bls key when `stake` or `delegateStake`.
+
+### Why I missed and how to spot
+
+1. Didn't pay enough attention to mapping update flow in the constructor.
+2. Check all the variable/mapping is updated in the constructor, ensure no mapping or values uninitialized.
+
+## [M - Base Fee Validation Bypass](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/146)
+
+### Summary
+
+1. Category - **Input validation**
+2. `validate_basefee()` only validates when there's base fee passed in.
+3. Skips validator if `None` is passed in.
+
+```rust
+   fn validate_basefee(&self, base_fee: Option<u64>) -> BatchValidationResult<()> {
+        if let Some(base_fee) = base_fee {
+            let expected_base_fee = self.base_fee.base_fee();
+            if base_fee != expected_base_fee {
+                return Err(BatchValidationError::InvalidBaseFee { expected_base_fee, base_fee });
+            }
+        }
+        Ok(())
+    }
+```
+
+### Why I missed and how to spot this
+
+1. Didn't full understand the importance of `base_fee` or gas tracking system, hence didn't check whether base_fee param is sufficiently validated.
+2. Ensure `base_fee` or gas is updated correctly, gas can ultimately lead to DOS.
+
+## [M - Protocol fund drain on burning unstaked validators](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/205)
+
+### Summary
+
+1. Protocol calls `ConsensusRegistry::_consensusBurn` to burn a validator's NFT, effectively removing it from the list of validators.
+2. However, the burn flow didn't check whether the validators has staked before transferring the `stakeAmount - balance` to the validators causing the protocol losing fund to validator.
+
+### Why I missed and how to spot this
+
+1. Wasn't checking the burn flow in detail, ensuring validators only get what they staked. Didn't think of different scenario that this can cause issue, eg what if the validator didn't stake in the first place.
+2. Ensure the fund transfer from protocol to validator is correct.
+
+## [M - Attacker can brick iTEL bridging and transfers taking advantage of caching flaw](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/362)
+
+### Summary
+
+1. `InterchainTEL::_clean()` caching system sets `cacheIndex` to point to records that were just deleted from the linked list(`_unsettledRecords`).
+2. When `cacheIndex` points to a deleted record, the caching logic breaks and `_unsettledBalanceOf()` must scan the entire linked list instead of using cached values.
+3. Attackers can send thousands of 1-wei transfers to any address, creating massive linked lists that cause out-of-gas errors when victims try to transfer, bridge, or unwrap their iTEL.
+
+```solidity
+Layer 1: Native TEL (gas token on Telcoin Network)
+Layer 2: WTEL (wrapped TEL - ERC20 version of native TEL)  
+Layer 3: iTEL (InterchainTEL - bridgeable version with recovery features)
+Layer 4: Cross-chain TEL (TEL on other networks via Axelar bridge)
+```
+
+`InterchainTEL::_clean`
+
+```solidity
+    while (_unsettledRecords[account].head > 0 && i < MAX_TO_CLEAN) {
+        uint256 index;
+        (r, index) = _unsettledRecords[account].first();
+        if (r.settlementTime > block.timestamp) break; //not expired yet
+        if (r.frozen > 0) {
+            _unsettledRecords[account].dequeue(false);
+        } else {
+            // @audit deletes the settled record
+            _unsettledRecords[account].dequeue(true);
+        }
+    
+        if (index <= cacheIndex) {
+            unsettled -= r.amount;
+            if (r.frozen > 0) {
+                unsettledFrozen -= r.frozen;
+            }
+        } else {
+            // @audit set the cacheIndex to the index of the record that was just deleted
+@>          cacheIndex = index;
+        }
+        i++;
+    }
+```
+
+### Why I missed and how to spot this
+
+1. Didn't trace the caching index update properly.
+2. Caching system to track which token transfer cross chain has been completed. Important to ensure that the index is being updated correctly.
