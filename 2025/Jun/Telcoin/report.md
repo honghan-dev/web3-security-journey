@@ -927,3 +927,25 @@ Layer 4: Cross-chain TEL (TEL on other networks via Axelar bridge)
 
 1. Didn't trace the caching index update properly.
 2. Caching system to track which token transfer cross chain has been completed. Important to ensure that the index is being updated correctly.
+
+## [M - Attacker uses underflow to prevent closeCase() from transferring stolen funds to victim](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/366)
+
+### Summary
+
+1. System uses `linked list` caching system to keep track of processTransaction (Transaction has a waiting window, hence using a `linked list`, data structure)
+2. If there's any stolen fund, the attacker can cause the bridging to revert due to wrong indexing and incorrect freeze amount update, causing underflow.
+
+```solidity
+// @note this mistakenly moves the index forward, so the freeze amount is not cached
+if (r.frozen > 0) {
+    // don't delete it from storage
+    _unsettledRecords[account].dequeue(false);  // ← Moves head forward!
+}
+
+// @note then the transaction will eventually be reverted due to underflow
+```
+
+### Why I missed this and how to spot this
+
+1. Didn't understand the bridging caching system in detail
+2. Don't avoid complicated linked list. Trace any linked list used, an index miss by one can cause serious issue.
