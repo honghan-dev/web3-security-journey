@@ -956,7 +956,7 @@ if (r.frozen > 0) {
 
 1. The system requires a validator to be excluded in 3 consecutive committee in order to exit.
 2. It will be hard for a validator who is in `pendingExit` to exit completely, because it is being treated the same as `active`, hence it will get elected as committee.
-3. The `_getValidator()` function mistakenly returns both `Active` and `PendingExit` validators
+3. The `_getValidator()` function mistakenly returns both `Active` and `PendingExit` validators, so `PendingExit` validators might still be included in future committee.
 
 ```solidity
 function _eligibleForCommitteeNextEpoch(ValidatorStatus status) internal pure returns (bool) {
@@ -968,4 +968,18 @@ function _eligibleForCommitteeNextEpoch(ValidatorStatus status) internal pure re
 
 ### Why I missed this and how to spot this
 
-1. Didn't understand the exit flow of a validator. I know that a committee need to be excluded from 3 rounds, but didn't notice that `_getValidators` function returns both `Active` and `PendingExit` validator
+1. Didn't understand the exit flow of a validator. I know that a committee need to be excluded for 3 rounds, but didn't notice that `_getValidators` function returns both `Active` and `PendingExit` validator
+2. Validators stake and exit is a critical part of a network, ensure that the flow is correct.
+
+## [Leader swap table panic causes network-wide shutdown](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/658)
+
+### Summary
+
+1. Protocol uses a reputation score to swap between validators for the next epoch.
+2. The method `swap` panics when the good_node list is empty but the bad_one is not empty, causes a node to crash, and eventually affect the entire network.
+3. `retrieve_first_nodes` method choosing the good one based on threshold, and if all of the good validator is more than the threshold, then the good_one list remain empty.
+
+### Why I missed this and how to spot this
+
+1. Didn't understand the flow of swapping bad validators with good validators in each epoch.
+2. Understand node's reputation score, and the validator swapping process.
