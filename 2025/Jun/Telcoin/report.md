@@ -949,3 +949,23 @@ if (r.frozen > 0) {
 
 1. Didn't understand the bridging caching system in detail
 2. Don't avoid complicated linked list. Trace any linked list used, an index miss by one can cause serious issue.
+
+## [Validator doing successful exit can be very improbable due to committee selection mechanism](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/473)
+
+### Summary
+
+1. The system requires a validator to be excluded in 3 consecutive committee in order to exit.
+2. It will be hard for a validator who is in `pendingExit` to exit completely, because it is being treated the same as `active`, hence it will get elected as committee.
+3. The `_getValidator()` function mistakenly returns both `Active` and `PendingExit` validators
+
+```solidity
+function _eligibleForCommitteeNextEpoch(ValidatorStatus status) internal pure returns (bool) {
+    return status == ValidatorStatus.Active 
+        || status == ValidatorStatus.PendingActivation
+        || status == ValidatorStatus.PendingExit;  // ⚠️ THIS IS THE PROBLEM!
+}
+```
+
+### Why I missed this and how to spot this
+
+1. Didn't understand the exit flow of a validator. I know that a committee need to be excluded from 3 rounds, but didn't notice that `_getValidators` function returns both `Active` and `PendingExit` validator
