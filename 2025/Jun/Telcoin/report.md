@@ -983,3 +983,15 @@ function _eligibleForCommitteeNextEpoch(ValidatorStatus status) internal pure re
 
 1. Didn't understand the flow of swapping bad validators with good validators in each epoch.
 2. Understand node's reputation score, and the validator swapping process.
+
+## [Incorrect State Update in _consensusBurn Leads to Loss of Validator Stake and Rewards](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/730)
+
+### Summary
+
+1. When slashing a validator, `ConsensusRegister::_consensusBurn` reset the balances to 0, wiping out validators stake and reward.
+2. Validator loses their reward.
+
+### Why I missed this and how to spot
+
+1. Didn't understand the validator staking and reward flow.
+2. Trace what gets slashed and what get return to the validator.
