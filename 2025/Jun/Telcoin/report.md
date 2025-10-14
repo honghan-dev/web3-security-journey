@@ -1000,9 +1000,9 @@ function _eligibleForCommitteeNextEpoch(ValidatorStatus status) internal pure re
 
 ### Summary
 
-1. This protocol prioritise validator's stake/voting power over good behavior
-2. `authorities_by_score_desc` method selects stake amount over reputation
-3. When it comes to dealing with tie-breaker, the system selects validators based on `AuthorityIdentifier` which is their `Pubkey` address
+1. The `LeaderSwapTable` maintains sets of "good" and "bad" nodes based on their reputation scores, allowing the system to swap out poorly performing leaders during consensus rounds.
+2. All committee members can be leaders, but bad nodes get swapped out with good nodes.
+3. When it comes to dealing with tie-breaker, the system selects validators based on `AuthorityIdentifier` which is their `Pubkey` address.
 
 ### Why I missed this and how to spot this
 
