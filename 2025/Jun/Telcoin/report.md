@@ -995,3 +995,16 @@ function _eligibleForCommitteeNextEpoch(ValidatorStatus status) internal pure re
 
 1. Didn't understand the validator staking and reward flow.
 2. Trace what gets slashed and what get return to the validator.
+
+## [Unfair authority selection in retrieve_first_nodes based on stake distribution rather than reputation scores](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/686)
+
+### Summary
+
+1. This protocol prioritise validator's stake/voting power over good behavior
+2. `authorities_by_score_desc` method selects stake amount over reputation
+3. When it comes to dealing with tie-breaker, the system selects validators based on `AuthorityIdentifier` which is their `Pubkey` address
+
+### Why I missed this and how to spot this
+
+1. Didn't understand the validator selection process, especially when it comes to deal with validators that has same reputation score and stake amount.
+2. Understand the selection process, what it based on, whether it's on reputation score or stake amount, and how to handle when there are large amount of validators having the same score and stake amount
