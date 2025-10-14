@@ -1008,3 +1008,25 @@ function _eligibleForCommitteeNextEpoch(ValidatorStatus status) internal pure re
 
 1. Didn't understand the validator selection process, especially when it comes to deal with validators that has same reputation score and stake amount.
 2. Understand the selection process, what it based on, whether it's on reputation score or stake amount, and how to handle when there are large amount of validators having the same score and stake amount
+
+## [Bad nodes face economic exclusion through irrecoverable reputation score trap](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/findings/681)
+
+### Summary
+
+1. Impossible for nodes that has once classified as `Bad_node` to catch up, because both `Good_node` and `Bad_node` each gets a point whenever proposing a sub-DAG.
+
+```rust
+// Equal point distribution, making bad_node impossible to catch-up
+for certificate in committed_sequence {  // All validators in sub-DAG
+    if certificate.header().parents().iter().any(|digest| 
+        *digest == last_committed_sub_dag.leader.digest()  // References previous leader
+    ) {
+        reputation_score.add_score(certificate.origin(), 1);  // +1 point each
+    }
+}
+```
+
+### Why I missed this and how to spot this
+
+1. Didn't understand the leader selection process, how to handle good and bad nodes. Ensuring fairness
+2. Understand the selection process in detail. Think of how good nodes and bad nodes get swapped(applicable in DAG mechanism)
