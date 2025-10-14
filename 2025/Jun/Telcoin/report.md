@@ -887,7 +887,7 @@ to be low.
 
 1. `InterchainTEL::_clean()` caching system sets `cacheIndex` to point to records that were just deleted from the linked list(`_unsettledRecords`).
 2. When `cacheIndex` points to a deleted record, the caching logic breaks and `_unsettledBalanceOf()` must scan the entire linked list instead of using cached values.
-3. Attackers can send thousands of 1-wei transfers to any address, creating massive linked lists that cause out-of-gas errors when victims try to transfer, bridge, or unwrap their iTEL.
+3. Attackers can send thousands of 1-wei transfers to any address, creating massive linked lists that cause `OOG(out-of-gas)` when victims try to transfer, bridge, or unwrap their iTEL.
 
 ```solidity
 Layer 1: Native TEL (gas token on Telcoin Network)
