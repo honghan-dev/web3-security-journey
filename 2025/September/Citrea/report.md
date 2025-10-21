@@ -92,11 +92,12 @@ valid_index + (k × 2^depth)
 
 ### Summary
 
-1. `pos != i` reorg detection always trigger because incorrect index comparison.
-2. pos checks the recent block starting with index 0, whereas finality_depth index check starting with 1.
-3. This result in reorg always get triggered because it is not comparing the same thing.
+1. Reorg detection is by comparing the blocks(up to finality_depth) from Bitcoin network and check if the tip has changed.
+2. If then compare the position of the Bitcoin blocks and the `recent_blocks(blocks being recorded in the Citrea network)`.
+3. `pos != i` reorg detection always trigger because incorrect index comparison.
+4. pos checks the recent block starting with index 0, whereas finality_depth index check starting with 1. This result in reorg always get triggered because it is not comparing the same thing.
 
 ### Why I missed this and how to spot
 
-1. Didn't understand the concept of reorg and reorg detection
-2. Ensure reorg detection is properly triggered. This is a classic off by one index, understanding.
+1. Didn't understand reorg detection and the flow of the detection.
+2. Ensure reorg detection is properly triggered. Understand what being compared in the function, eg.`blockhash`, `blockheight` or `tip`  This is a classic off by one index, understanding.
