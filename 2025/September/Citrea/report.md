@@ -42,3 +42,36 @@
 
 1. Didn't understand the flow of adding new deposit transaction, what it checks and how many transactions it accepts.
 2. Ensure that code implement a rate limit and duplicate check when it comes to accept transactions before adding into the mempool.
+
+## Medium Finding
+
+## [SPV Merkle Proof Duplication Allows Forged Transaction Inclusion](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/660)
+
+### Summary
+
+1. SPV(Simplified payment verification) for bitcoin light clients to verify that a transaction was included in a block with downloading the entire blockchain.
+2. `BitcoinLightClient::_verifyInclusion` function uses `bitcoin-spv::prove::verify256Merkle` which only valid the lower bits of the index.
+3. Attacker can then provide an incorrect index, that results with the same lower bits as other merkle leaf
+
+```rust
+// example
+Index 1 = 001 // correct
+Index 5 = 101 (which is 1 + 4, where 4 = 2^2) // incorrect!!!
+Index 9 = 1001 (which is 1 + 8, where 8 = 2^3)
+
+// using this formula
+valid_index + (k × 2^depth)
+```
+
+```solidity
+  function _verifyInclusion(bytes32 _blockHash, bytes32 _wtxId, bytes calldata _proof, uint256 _index) internal view returns (bool) {
+        require(_proof.length == coinbaseDepths[_blockHash] * 32, "Invalid proof length");
+        bytes32 _witnessRoot = witnessRoots[_blockHash];
+        return ValidateSPV.prove(_wtxId, _witnessRoot, _proof, _index); // <@ uses bitcoin-spv library, only checks lower bit
+    }
+```
+
+### Why I missed this and how to spot this
+
+1. Didn't understand fully how merkle verification works in this protocol and didn't trace in detail the lbrary that the protocol used to verify merkle tree.
+2. Ensure any `merkle verification validate index bounds`. `Bitcoin-spv` library only uses the lower bits, so an index bound check is critical
