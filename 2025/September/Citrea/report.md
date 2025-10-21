@@ -87,3 +87,16 @@ valid_index + (k × 2^depth)
 
 1. Didn't understand the network connection of the protocol, go through how protocol request data from other node.
 2. Ensure there's proper `timeout`, limit bound on receiving blocks.
+
+## [M - Logic Error in Reorg Detection in chain-state update triggers unnecessary reorg handling](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/563)
+
+### Summary
+
+1. `pos != i` reorg detection always trigger because incorrect index comparison.
+2. pos checks the recent block starting with index 0, whereas finality_depth index check starting with 1.
+3. This result in reorg always get triggered because it is not comparing the same thing.
+
+### Why I missed this and how to spot
+
+1. Didn't understand the concept of reorg and reorg detection
+2. Ensure reorg detection is properly triggered. This is a classic off by one index, understanding.
