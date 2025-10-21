@@ -85,5 +85,5 @@ valid_index + (k × 2^depth)
 
 ### Why I missed this and how to spot this
 
-1. Didn't understand the network connection of the protocol.
+1. Didn't understand the network connection of the protocol, go through how protocol request data from other node.
 2. Ensure there's proper `timeout`, limit bound on receiving blocks.
