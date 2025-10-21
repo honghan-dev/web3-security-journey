@@ -75,3 +75,15 @@ valid_index + (k × 2^depth)
 
 1. Didn't understand fully how merkle verification works in this protocol and didn't trace in detail the lbrary that the protocol used to verify merkle tree.
 2. Ensure any `merkle verification validate index bounds`. `Bitcoin-spv` library only uses the lower bits, so an index bound check is critical
+
+## [M - Infinite timeout in the Bitcoin JSON-RPC client can freeze all critical Citrea compoments](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/569)
+
+### Summary
+
+1. Citrea `ClientBuilder` did not set timeout, could cause it to hang forever, when no reply from bitcoin node.
+2. `BitcoinService` does use exponential backoff for RPC calls, but it won't get activated if it didn't receive any respond from bitcoin node.
+
+### Why I missed this and how to spot this
+
+1. Didn't understand the network connection of the protocol.
+2. Ensure there's proper `timeout`, limit bound on receiving blocks.
