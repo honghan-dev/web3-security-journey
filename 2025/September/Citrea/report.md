@@ -228,3 +228,15 @@ valid_index + (k × 2^depth)
 
 1. Didn't check that anything untrusted needs to have validation and bound limit.
 2. Ensure any input(reply from other node/prover) needs to be validated and have upper bound limit.
+
+## [M - Unauthenticated DoS via JsTracer on debug_traceBlockByNumber Endpoint](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/228)
+
+### Summary
+
+1. The publicly exposed `debug_traceBlockByNumber` RPC endpoint allows arbitrary JavaScript execution through the `JsTracer` tracer option, enabling trivial denial-of-service attacks that can crash full nodes.
+2. Attacker can send memory-intensive operations that consume large `GB` of RAM per request, leading to node crashing.
+
+### Why I missed this and how to spot this
+
+1. Didn't understand how tracing monitoring works in detail, didn't relate JS operation could consume massive RAM and causes the node to crash
+2. Look for `code-as-data` patterns, user input that can be treated as code. eg. function call in JSON format.
