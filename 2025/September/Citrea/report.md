@@ -215,3 +215,16 @@ valid_index + (k × 2^depth)
 
 1. Didn't consider the impact of not having timeout, that can freeze certain sequencer operation.
 2. Ensure any request has a timeout, or alternate method if the response wouldn't complete.
+
+## [M - Bitcoin DA Unbounded pre-decompression accumulation causes DoS/OOM](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/273)
+
+### Summary
+
+1. The protocol will split ZK proof into multiple chunks if the proof is too large.
+2. However, the `Bitcoin_da::extract_relevant_zk_proofs()` has no limit for pre-decompression accumulation.
+3. ZK proof can be large causing OOM(out-of-memory) which leads to DOS.
+
+### Why I missed this and how to spot this
+
+1. Didn't check that anything untrusted needs to have validation and bound limit.
+2. Ensure any input(reply from other node/prover) needs to be validated and have upper bound limit.
