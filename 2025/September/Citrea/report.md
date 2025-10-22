@@ -240,3 +240,31 @@ valid_index + (k × 2^depth)
 
 1. Didn't understand how tracing monitoring works in detail, didn't relate JS operation could consume massive RAM and causes the node to crash
 2. Look for `code-as-data` patterns, user input that can be treated as code. eg. function call in JSON format.
+
+## [M - Failed deposit transactions cause nonce mismatch and break L2 block production](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/154)
+
+### Summary
+
+1. Deposit transaction increase nonce, but didn't decrease the nonce if the transaction failed, causing mismatch nonce.
+2. Attacker can submit transaction that failed, causing the block production to fail as well
+3. Impact can only be triggered with specific cases, such as using duplicate transaction.
+
+- Because every transaction starts a new `WorkingSet`, so duplicate transaction can't be detected. Therefore this will trigger the nonce mismatch bug.
+- Or time based transaction, transaction that will pass dry run(before adding into mempool), but failed during execution(block building)
+
+### Why I missed this and how to spot this
+
+1. Missed out that the `nonce` didn't decrement after a failed transaction.
+2. Ensure all states after simulation are correct.
+
+## [M - Proof-Slot Leak Halts Parallel Prover](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/41)
+
+### Summary
+
+1. Citrea uses parallel proving system for proving. It decreases the thread count when starting a thread for proving, however, it didn't decrement the count if the proving failed, causes thread count leak.
+2. If all thread being occupied after proving failed, eventually it will stop the proving
+
+### Why I missed this and how to spot this
+
+1. Didn't understand the proving flow, new threads/resources are spawn to handle each proving for parallel execution.
+2. Ensure any error/failure are properly handled, either bubble up if critical or clean up if not critical.
