@@ -1,3 +1,92 @@
+# My finding
+
+## Medium Finding
+
+<details>
+<Summary>Last pending commitment will be missing when sequencer restarts</Summary>
+
+## Summary
+
+The LedgerDB::get_pending_commitments doesn't include the last commitment index when querying commitment data in LedgerDB::get_data_range. This results in incomplete commitments recovery whenever the sequencer restarts.
+
+## Finding Description
+
+In LedgerDB::get_pending_commitments:
+
+```rust
+fn get_pending_commitments(&self) -> anyhow::Result<Vec<SequencerCommitment>> {
+        let commitment_indexes = self.db.get::<PendingSequencerCommitment>(&())?;
+        match commitment_indexes {
+            Some(mut commitment_indexes) => {
+                if commitment_indexes.is_empty() {
+                    return Ok(vec![]);
+                }
+                commitment_indexes.sort_unstable();
+                let start = commitment_indexes[0]; // @note first pending index
+                let end = commitment_indexes[commitment_indexes.len() - 1]; // @note last pending index
+
+                // @audit [HIGH] doesn't include the last commitment
+@>          self.get_data_range::<SequencerCommitmentByIndex, _,_>(&(start..end)) // @note doesn't include the last pending index
+            }
+            None => Ok(vec![]),
+        }
+    }
+```
+
+However, Range type (start..end) is exclusive, meaning the last pending commitment (end) is not included in the query.
+
+This range is then passed in LedgerDB::get_data_range to retrieve the values.
+
+```rust
+fn get_data_range<T, K, V>(&self, range: &std::ops::Range<K>) -> Result<Vec<V>, anyhow::Error>
+    where
+        T: Schema<Key = K, Value = V>,
+        K: Into<u64> + Copy + SeekKeyEncoder<T>,
+    {
+        let mut raw_iter = self.db.iter()?;
+        let max_items = (range.end.into() - range.start.into()) as usize; // @note smaller range than expected
+        raw_iter.seek(&range.start)?;
+        let iter = raw_iter.take(max_items);
+        let mut out = Vec::with_capacity(max_items);
+        for res in iter {
+            let batch = res?.value;
+            out.push(batch)
+        }
+        Ok(out)
+    }
+```
+
+This will miss the final pending commitment
+
+## Impact Explanation
+
+[HIGH] - Missing the last pending commitment can cause incomplete state recovery,
+
+## Likelihood Explanation
+
+[MEDIUM] - This happens whenever a sequencer restarts, with an existing pending commitment
+
+## Proof of Concept
+
+Assume the following pending commitment indexes exist in the database: `[8, 9, 10, 11, 12]`
+
+get_pending_commitments sets:
+
+```rust
+start = 8
+end = 12
+It then passes start..end (i.e., 8..12) to get_data_range. This range includes indexes 8 through 11, excluding index 12 — the last pending commitment.
+
+As a result, the commitment at index 12 is never recovered, causing incomplete state restoration.
+```
+
+## Recommendation
+
+Include the last index in the LedgerDB::get_data_range
+</details>
+
+---
+
 # Other finding
 
 ## High Severity
@@ -101,3 +190,28 @@ valid_index + (k × 2^depth)
 
 1. Didn't understand reorg detection and the flow of the detection.
 2. Ensure reorg detection is properly triggered. Understand what being compared in the function, eg.`blockhash`, `blockheight` or `tip`  This is a classic off by one index, understanding.
+
+## [M - Insufficient Funds Due to Incorrect Amount Comparison](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/544)
+
+### Summary
+
+1. UTXO(unspent transaction output) are Bitcoin's way of tracking ownership. Each wallet potentially consist of multiple UTXOs.
+2. The `choose_utxos` function incorrectly compares the total accumulated UTXO value against the remaining amount needed (after subtracting required UTXOs) instead of comparing against the original target amount.
+3. This causes early termination when the function thinks it has enough funds, but actually returns insufficient UTXOs, leading to invalid transactions where `inputs < outputs`.
+
+### Why I missed this and how to spot
+
+1. Didn't understand the UTXO selection flow, didn't notice that the selection comparison wasn't done correctly.
+2. Ensure the logics are correct, using the correct value as comparison.
+
+## [M - Infinite HTTP client timeout in FeeService can freeze the sequencer](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/findings/417)
+
+### Summary
+
+1. `FeeService` Bitcoin fee rates from mempool.service API using `reqwest` HTTP without a configured timeout.
+2. This could freeze sequencer operation if the network call never completes as this module is used in `run_da_queue()` and `da_block_monitor`
+
+### Why I missed this and how to spot
+
+1. Didn't consider the impact of not having timeout, that can freeze certain sequencer operation.
+2. Ensure any request has a timeout, or alternate method if the response wouldn't complete.
