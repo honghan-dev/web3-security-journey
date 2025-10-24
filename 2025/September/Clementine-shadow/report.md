@@ -103,3 +103,47 @@ async fn disprove_if_ready(&mut self, context: &mut StateContext<T>) {
 ### How to spot this
 
 1. Understand what are the condition to fulfill before sending disprove transaction. How can operator cause watchtower's disprove transaction to fail.
+
+## [M - Incorrect logic in `calculate_bump_feerate` prevents transaction fees from being bumped properly](https://cantina.xyz/code/ce181972-2b40-4047-8ee9-89ec43527686/findings/684)
+
+### Summary
+
+1. Bitcoin => `satoshi/vB(virtual byte)`, Citrea(EVM compatible block) => `gas * gwei`
+2. `calculate_bump_feerate` when operator wants to rebroadcast an unconfirmed transaction with a higher fee for miner to prioritize it. (Replace by fee).
+3. Function incorrectly calculate the additional bump fee. Intended purpose, new fee = original fee + bump fee.
+
+```rust
+pub async fn calculate_bump_feerate(
+    &self,
+    txid: &Txid,
+    new_feerate: FeeRate,
+) -> Result<Option<Amount>> {
+    // [...]
+    // Conservative vsize calculation
+    let original_tx_vsize = original_tx_weight.to_vbytes_floor();
+
+    let original_feerate = original_tx_fee.to_sat() as f64 / original_tx_vsize as f64;
+
+    // Use max of target fee rate and original + incremental rate
+    // @audit wrong formula, this is inversely proportional to the size of virtual byte
+    let min_bump_feerate = original_feerate + (222f64 / original_tx_vsize as f64); // [1]
+
+    let effective_feerate_sat_per_vb = std::cmp::max(
+        new_feerate.to_sat_per_vb_ceil(),
+        min_bump_feerate.ceil() as u64,
+    );
+
+    // If original feerate is already higher than target, avoid bumping
+    // @audit should compare to effective_feerate_sat_per_vb instead cause new_feerate could be ower than effective fee rate
+    if original_feerate >= new_feerate.to_sat_per_vb_ceil() as f64 { // [2]
+        return Ok(None);
+    }
+
+    Ok(Some(Amount::from_sat(effective_feerate_sat_per_vb)))
+}
+```
+
+### How to spot this
+
+1. First understand the flow of bumping up fee rate to prioritize transaction.
+2. Understand how are the bump being implemented.
