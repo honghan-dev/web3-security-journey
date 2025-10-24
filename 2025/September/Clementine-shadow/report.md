@@ -147,3 +147,51 @@ pub async fn calculate_bump_feerate(
 
 1. First understand the flow of bumping up fee rate to prioritize transaction.
 2. Understand how are the bump being implemented.
+
+## [M - Incorrect error handling in state machine](https://cantina.xyz/code/ce181972-2b40-4047-8ee9-89ec43527686/findings/563)
+
+### Summary
+
+1. Too broad error handling in state machine, possible of halting entire process.
+2. 1 error can cause the entire system to stop processing
+
+```rust
+// @audit one error crashes all the FSM
+if !all_errors.is_empty() {
+    // revert state machines to checkpointed state
+    self.kickoff_machines = kickoff_machines_checkpoint;
+    self.round_machines = round_machines_checkpoint;
+
+    return Err(eyre::eyre!(
+        "Multiple errors occurred during state processing: {:?}", all_errors
+    ));
+}
+```
+
+### How to spot this
+
+1. Ensure proper error handling if one of the thread fails, so that it doesn't affect the entire system.
+
+## []()
+
+### Summary
+
+1. In `Operator::get_reimbursement_txs`, within the branch that sends the kickoff when it is not yet onchain, the code constructs `move_txid` as `Txid::all_zeros()` and then calls `get_payout_info_from_move_txid` with this zero txid. It should use the actual deposit's `move_to_vault` txid, not a zero txid placeholder.
+
+```rust
+// core/src/operator.rs
+// @audit uses placeholder instead of actual move_txid
+let move_txid = Txid::all_zeros();
+
+let (_, _, _, citrea_idx) = self
+    .db
+    .get_payout_info_from_move_txid(dbtx.as_deref_mut(), move_txid)
+    .await?
+    .ok_or_eyre("Couldn't find payout info from move txid")?;
+
+// CODE OMITTED //
+```
+
+### How to spot this
+
+1. Understand the bridge reimbursement flow, it should correctly retrieve the actual deposit txid.
