@@ -15,7 +15,7 @@ This repository will be regularly updated as I participate in new contests and e
 
 | **Date**   | **Contest**                                         | **Platform** | **Tag** | **Findings** | **Result**     | **Rank**  |
 |------------|-----------------------------------------------------|--------------|---------|--------------|----------------|-----------|
-| 2025 Oct   | [**Citrea**](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/overview) | Cantina      | L2      | –            | $1,390         | 8th    |
+| 2025 Oct   | [**Citrea**](https://cantina.xyz/code/49b9e08d-4f8f-4103-b6e5-f5f43cf9faa1/overview) | Cantina      | L2      | 1M            | $1,390         | 8th    |
 | 2025 May   | [**Telcoin**](https://cantina.xyz/code/26d5255b-6f68-46cf-be55-81dd565d9d16/README.md) | Cantina      | L1      | 1H           | $1            | –         |
 | 2025 May   | [**Aquarius**](https://cantina.xyz/code/990ce947-05da-443e-b397-be38a65f0bff/overview) | Cantina      | DeFi    | 2L           | $0            | –         |
 | 2025 Apr   | [**Velvet V4**](https://cantina.xyz/competitions/8cf9c7a0-a7a6-446a-8577-1e2c254eb5a8)  | Cantina      | DeFi    | 2M, 3L       | 238.3 USDC    | 23 / 624  |
